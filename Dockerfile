@@ -1,4 +1,7 @@
 FROM openjdk:17
 EXPOSE 8080
-ADD target/test-docker.jar test-docker.jar
+RUN mkdir /app
+
+COPY --from=build /home/gradle/src/build/libs/*.jar /app/test-docker.jar
+
 ENTRYPOINT ["java", "-jar","/test-docker.jar"]
