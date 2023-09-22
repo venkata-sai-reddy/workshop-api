@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @PropertySource("classpath:sql.properties")
-@ConfigurationProperties(prefix="sql")
+@ConfigurationProperties(prefix = "sql")
 public class SqlProperties {
 
 	public static Map<String, String> user;
@@ -21,5 +21,5 @@ public class SqlProperties {
 	public void setLogin(Map<String, String> login) {
 		SqlProperties.login = login;
 	}
-	
+
 }

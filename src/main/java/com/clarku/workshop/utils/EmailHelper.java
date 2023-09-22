@@ -17,33 +17,33 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 public class EmailHelper {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(EmailHelper.class);
 
 	@Autowired
 	JavaMailSenderImpl mailer;
-	
+
 	@Autowired
 	TemplateEngine templateEngine;
-	
+
 	public void sendEMail(EmailVO emailVO) throws GlobalException, EmailException {
 		MimeMessage mimeMessage = mailer.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
-        Context context = new Context();
-        emailVO.getVariables().forEach((var, val) -> context.setVariable(var, val));
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+		Context context = new Context();
+		emailVO.getVariables().forEach((var, val) -> context.setVariable(var, val));
 
-        try {
-            helper.setTo(emailVO.getSendTo());
-            helper.setSubject(emailVO.getSubject());
-            String htmlContent = templateEngine.process(emailVO.getTemplateName(), context);
-            helper.setText(htmlContent, true);
-            mailer.send(mimeMessage);
-        } catch (MessagingException exp) {
-        	log.error("Failed to send the Notification" + exp.getMessage());
-        	throw new EmailException("Failed to Send Email, Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception exp) {
-        	throw new GlobalException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+		try {
+			helper.setTo(emailVO.getSendTo());
+			helper.setSubject(emailVO.getSubject());
+			String htmlContent = templateEngine.process(emailVO.getTemplateName(), context);
+			helper.setText(htmlContent, true);
+			mailer.send(mimeMessage);
+		} catch (MessagingException exp) {
+			log.error("Failed to send the Notification" + exp.getMessage());
+			throw new EmailException("Failed to Send Email, Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			throw new GlobalException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
