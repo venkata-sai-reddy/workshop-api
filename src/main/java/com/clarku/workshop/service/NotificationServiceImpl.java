@@ -15,7 +15,7 @@ import com.clarku.workshop.vo.EmailVO;
 public class NotificationServiceImpl implements INotificationService {
 
 	@Autowired
-	private EmailHelper email;
+	EmailHelper email;
 
 	@Override
 	public void sendSuccessSignUpMail(String emailId, String firstName) throws EmailException, GlobalException {
@@ -25,6 +25,7 @@ public class NotificationServiceImpl implements INotificationService {
 		emailVO.setTemplateName(EmailConstants.SIGNUP_SUCCESS_TEMPLATE);
 		HashMap<String, String> variables = new HashMap<>();
 		variables.put("firstName", firstName);
+		emailVO.setVariables(variables);
 		email.sendEMail(emailVO);
 	}
 
