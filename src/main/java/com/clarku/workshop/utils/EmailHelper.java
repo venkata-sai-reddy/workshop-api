@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -16,6 +17,7 @@ import com.clarku.workshop.vo.EmailVO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+@Component
 public class EmailHelper {
 
 	private static final Logger log = LoggerFactory.getLogger(EmailHelper.class);
@@ -30,7 +32,9 @@ public class EmailHelper {
 		MimeMessage mimeMessage = mailer.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
 		Context context = new Context();
-		emailVO.getVariables().forEach((var, val) -> context.setVariable(var, val));
+		if (!emailVO.getVariables().isEmpty()) {
+			emailVO.getVariables().forEach((var, val) -> context.setVariable(var, val));
+		}
 
 		try {
 			helper.setTo(emailVO.getSendTo());
@@ -42,6 +46,7 @@ public class EmailHelper {
 			log.error("Failed to send the Notification" + exp.getMessage());
 			throw new EmailException("Failed to Send Email, Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {
+			log.error("Failed to send the Notification" + exp.getMessage());
 			throw new GlobalException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
