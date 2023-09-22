@@ -1,6 +1,5 @@
 package com.clarku.workshop.service;
 
-
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -21,31 +20,31 @@ public class NotificationServiceTest {
 
 	@InjectMocks
 	NotificationServiceImpl notificationService;
-	
+
 	@Mock
 	EmailHelper email;
 
 	@Before
-    public void initMocks(){
-        MockitoAnnotations.openMocks(this);
-    }
-	
+	public void initMocks() {
+		MockitoAnnotations.openMocks(this);
+	}
+
 	@Test
-    public void testSignUpMail() throws GlobalException, EmailException {
-        notificationService.sendSuccessSignUpMail("user@username.com", "username");
-        assertTrue(true);
-    }
-	
+	public void testSignUpMail() throws GlobalException, EmailException {
+		notificationService.sendSuccessSignUpMail("user@username.com", "username");
+		assertTrue(true);
+	}
+
 	@Test(expected = EmailException.class)
-    public void testSignUpMail_EmailException() throws GlobalException, EmailException {
-        Mockito.doThrow(EmailException.class).when(email).sendEMail(Mockito.any());
+	public void testSignUpMail_EmailException() throws GlobalException, EmailException {
+		Mockito.doThrow(EmailException.class).when(email).sendEMail(Mockito.any());
 		notificationService.sendSuccessSignUpMail("user@gmail.com", "firstName");
-    }
-	
+	}
+
 	@Test(expected = GlobalException.class)
-    public void testSignUpMail_GlobalException() throws GlobalException, EmailException {
-        Mockito.doThrow(GlobalException.class).when(email).sendEMail(Mockito.any());
+	public void testSignUpMail_GlobalException() throws GlobalException, EmailException {
+		Mockito.doThrow(GlobalException.class).when(email).sendEMail(Mockito.any());
 		notificationService.sendSuccessSignUpMail("username@user.com", "firstname");
-    }
-	
+	}
+
 }
