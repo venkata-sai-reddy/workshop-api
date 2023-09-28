@@ -1,7 +1,5 @@
 package com.clarku.workshop.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -16,11 +14,11 @@ import com.clarku.workshop.vo.EmailVO;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.log4j.Log4j2;
 
 @Component
+@Log4j2
 public class EmailHelper {
-
-	private static final Logger log = LoggerFactory.getLogger(EmailHelper.class);
 
 	@Autowired
 	JavaMailSenderImpl mailer;
@@ -33,7 +31,7 @@ public class EmailHelper {
 		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
 		Context context = new Context();
 		if (!emailVO.getVariables().isEmpty()) {
-			emailVO.getVariables().forEach((var, val) -> context.setVariable(var, val));
+			emailVO.getVariables().forEach(context::setVariable);
 		}
 
 		try {
