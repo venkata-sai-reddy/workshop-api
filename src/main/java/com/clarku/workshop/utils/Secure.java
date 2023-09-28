@@ -2,6 +2,11 @@ package com.clarku.workshop.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -36,5 +41,28 @@ public class Secure {
 			log.error("Secure :: hashing : " + exp.getMessage());
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	public String generateTempPass() {
+		SecureRandom rand = new SecureRandom();
+		String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String numeric = "0123456789";
+		String special = "!@#$&*+-.,?";
+		StringBuilder pass = new StringBuilder();
+		pass.append(alpha.charAt(rand.nextInt(alpha.length())));
+		pass.append(alpha.toLowerCase().charAt(rand.nextInt(alpha.length())));
+		pass.append(numeric.charAt(rand.nextInt(numeric.length())));
+		pass.append(special.charAt(rand.nextInt(special.length())));
+		String allChars = alpha + alpha.toLowerCase() + numeric + special;
+		for (int index = 0; index <= rand.nextInt(4, 8); index++) {
+			pass.append(allChars.charAt(rand.nextInt(allChars.length())));
+		}
+		List<String> passChars = Arrays.asList(pass.toString().split(""));
+		Collections.shuffle(passChars);
+		pass = new StringBuilder("");
+		for (String letter : passChars) {
+			pass.append(letter);
+		}
+		return pass.toString();
 	}
 }

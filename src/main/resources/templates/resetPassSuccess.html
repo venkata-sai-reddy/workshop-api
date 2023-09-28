@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" type="text/css" media="all" href="/gtvg/css/gtvg.css" />
+  </head>
+
+  <body>
+  
+    Hello <span th:text="${firstName}"> User </span>, <br>
+
+	<br>Your password was successfully reset.<br>
+	<br>Your temporary Login Credentials are : "<span th:text="${tempPass}"> </span>" <br>
+	<br>Please do not reply to this email. This is system generated email.<br>
+	We will never ask for your password, and we strongly discourage you from sharing it with anyone.<br><br>
+    
+    Thanks,<br>
+	Workshop Team<br>
+  </body>
+
+</html>

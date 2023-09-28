@@ -16,6 +16,8 @@ public class LoginVO {
 
 	@NotEmpty(message = "Password should not be empty", groups = { LoginValidation.class })
 	private String password;
+	
+	private String tempPassword;
 
 	private Boolean isAdmin;
 

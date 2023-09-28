@@ -12,6 +12,7 @@ import com.clarku.workshop.utils.Secure;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.UserVO;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -33,11 +34,19 @@ public class LoginServiceImpl implements ILoginService {
 	private LoginVO validateUser(LoginVO loginDetails) throws GlobalException, LoginException {
 		LoginVO userLoginDetails = loginRepo.retrieveUserLogin(loginDetails.getEmailId());
 		String encryptPass = secure.getEncrypted(loginDetails.getPassword());
+		if (userLoginDetails == null) {
+			log.error("LoginServiceImpl :: validateUser(): User {} ", loginDetails.getEmailId());
+			throw new LoginException(Constants.NOT_REGISTERED_EXP, HttpStatus.UNAUTHORIZED); 
+		}
 		if (Boolean.TRUE.equals(userLoginDetails.getIsLocked())) {
 			log.error("LoginServiceImpl:: validateUser() : " + Constants.USER_LOCKED_EXP);
 			throw new LoginException(Constants.USER_LOCKED_EXP, HttpStatus.UNAUTHORIZED);
 		}
-		if (!encryptPass.equals(userLoginDetails.getPassword())) {
+		String actualPass = userLoginDetails.getPassword();
+		if (StringUtils.isNotBlank(userLoginDetails.getTempPassword())) {
+			actualPass = userLoginDetails.getTempPassword();
+		}
+		if (!encryptPass.equals(actualPass)) {
 			if (userLoginDetails.getFailedLoginAttempts().equals(Integer.valueOf(2))) {
 				loginRepo.lockUserAccount(userLoginDetails.getUserId());
 			} else {

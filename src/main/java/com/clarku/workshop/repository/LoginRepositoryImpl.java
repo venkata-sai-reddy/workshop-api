@@ -2,7 +2,6 @@ package com.clarku.workshop.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.clarku.workshop.config.SqlProperties;
+import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.vo.LoginVO;
@@ -29,21 +29,17 @@ public class LoginRepositoryImpl implements ILoginRepo {
 	private static final String EMAIL_ID = "emailId";
 
 	@Override
-	public LoginVO retrieveUserLogin(String emailId) throws LoginException {
-		LoginVO userLoginDetails;
+	public LoginVO retrieveUserLogin(String emailId) throws GlobalException {
+		LoginVO userLoginDetails = null;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(EMAIL_ID, emailId);
 		try {
 			userLoginDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.login.get("getLoginDetailsByEmailId"), parameters, new BeanPropertyRowMapper<LoginVO>(LoginVO.class));
-		} catch (EmptyResultDataAccessException exp) {
-			log.error("LoginRepositoryImpl :: retrieveUserLogin(): User {} not found in system with error {}", emailId,	exp.getMessage());
-			throw new LoginException(Constants.NOT_REGISTERED_EXP, HttpStatus.UNAUTHORIZED);
 		} catch (DataAccessException exp) {
 			log.error("LoginRepositoryImpl :: retrieveUserLogin(): data access exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {
 			log.error("LoginRepositoryImpl :: retrieveUserLogin(): exception : {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return userLoginDetails;
 	}
@@ -112,7 +108,7 @@ public class LoginRepositoryImpl implements ILoginRepo {
 	}
 
 	@Override
-	public Boolean isUserExists(String emailId) throws LoginException {
+	public Boolean isUserExists(String emailId) throws GlobalException {
 		int count = 0;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(EMAIL_ID, emailId);
@@ -120,16 +116,15 @@ public class LoginRepositoryImpl implements ILoginRepo {
 			count = namedParameterJdbcTemplate.queryForObject(SqlProperties.user.get("isUserExistsByEmail"), parameters, Integer.class);
 		} catch (DataAccessException exp) {
 			log.error("LoginRepositoryImpl :: isUserExists(): data access exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {
 			log.error("LoginRepositoryImpl :: isUserExists(): exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return count != 0;
 	}
 
 	@Override
-	public Integer getUserId(String emailId) throws LoginException {
+	public Integer getUserId(String emailId) throws GlobalException {
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(EMAIL_ID, emailId);
 		Integer userId;
@@ -137,12 +132,30 @@ public class LoginRepositoryImpl implements ILoginRepo {
 			userId = namedParameterJdbcTemplate.queryForObject(SqlProperties.user.get("getUserIdByEmail"), parameters, Integer.class);
 		} catch (DataAccessException exp) {
 			log.error("LoginRepositoryImpl :: getUserId(): data access exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {
 			log.error("LoginRepositoryImpl :: getUserId(): exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return userId;
+	}
+
+	@Override
+	public Boolean saveTempPassword(Integer userId, String tempPass) throws GlobalException {
+		int updatedCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(USER_ID, userId);
+		parameters.addValue("tempPassword", tempPass);
+		try {
+			updatedCount = namedParameterJdbcTemplate.update(SqlProperties.login.get("saveTempPassQuery"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("LoginRepositoryImpl :: saveTempPassword(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("LoginRepositoryImpl :: saveTempPassword(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return updatedCount == 1;
 	}
 
 }

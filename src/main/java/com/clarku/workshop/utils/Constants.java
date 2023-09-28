@@ -25,4 +25,6 @@ public class Constants {
 
 	public static final String INVALID_SESSION_EXP = "Invalid Session, please try to Login";
 
+	public static final String USER_NOT_EXISTS_FORGET_PASS_EXP = "Email Id does not exists, Please check and try again";
+
 }
