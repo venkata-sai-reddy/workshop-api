@@ -30,7 +30,7 @@ public class NotificationServiceTest {
 	}
 
 	@Test
-	public void testSignUpMail() throws GlobalException, EmailException {
+	public void testSignUpMail_Success() throws GlobalException, EmailException {
 		notificationService.sendSuccessSignUpMail("user@username.com", "username");
 		assertTrue(true);
 	}
@@ -45,6 +45,24 @@ public class NotificationServiceTest {
 	public void testSignUpMail_GlobalException() throws GlobalException, EmailException {
 		Mockito.doThrow(GlobalException.class).when(email).sendEMail(Mockito.any());
 		notificationService.sendSuccessSignUpMail("username@user.com", "firstname");
+	}
+	
+	@Test
+	public void testResetPassMail_Success() throws GlobalException, EmailException {
+		notificationService.sendSuccessResetPassEmail("user@username.com", "username", "h22he@3bG");
+		assertTrue(true);
+	}
+
+	@Test(expected = EmailException.class)
+	public void testResetPassMail_EmailException() throws GlobalException, EmailException {
+		Mockito.doThrow(EmailException.class).when(email).sendEMail(Mockito.any());
+		notificationService.sendSuccessResetPassEmail("user@gmail.com", "firstName", "Abcd!23");
+	}
+
+	@Test(expected = GlobalException.class)
+	public void testResetPassMail_GlobalException() throws GlobalException, EmailException {
+		Mockito.doThrow(GlobalException.class).when(email).sendEMail(Mockito.any());
+		notificationService.sendSuccessResetPassEmail("username@user.com", "firstname", "Des#2102");
 	}
 
 }

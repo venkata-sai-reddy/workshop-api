@@ -60,6 +60,28 @@ public class LoginServiceTest {
 		assertEquals(userVO.getEmailId(), userDetails.getEmailId());
 	}
 
+	@Test
+	public void testSignIn_TempPassSuccess() throws GlobalException, LoginException {
+		loginDetails = new LoginVO();
+		loginDetails.setUserId(1);
+		loginDetails.setEmailId("user1@user.com");
+		loginDetails.setPassword("hghjegjdsbfsdfb");
+		loginDetails.setTempPassword("tyvhgvjbjhvjxfd");
+		loginDetails.setIsLocked(false);
+		loginDetails.setFailedLoginAttempts(0);
+		Mockito.when(loginRepo.retrieveUserLogin(Mockito.anyString())).thenReturn(loginDetails);
+		Mockito.when(secure.getEncrypted(Mockito.anyString())).thenReturn(loginDetails.getTempPassword());
+		Mockito.when(loginRepo.retrieveUserDetails(Mockito.anyInt())).thenReturn(userDetails);
+		UserVO userVO = loginService.signIn(loginDetails);
+		assertEquals(userVO.getEmailId(), userDetails.getEmailId());
+	}
+
+	@Test(expected = LoginException.class)
+	public void testSignIn_NoUserExists() throws GlobalException, LoginException {
+		Mockito.when(loginRepo.retrieveUserLogin(Mockito.anyString())).thenReturn(null);
+		loginService.signIn(loginDetails);
+	}
+
 	@Test(expected = LoginException.class)
 	public void testSignIn_WrongPassException() throws GlobalException, LoginException {
 		Mockito.when(loginRepo.retrieveUserLogin(Mockito.anyString())).thenReturn(loginDetails);
