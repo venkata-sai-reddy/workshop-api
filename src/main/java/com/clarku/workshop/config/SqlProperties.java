@@ -17,6 +17,7 @@ public class SqlProperties {
 	public static Map<String, String> user;
 	public static Map<String, String> login;
 	public static Map<String, String> session;
+	public static Map<String, String> skills;
 
 	public void setUser(Map<String, String> user) {
 		SqlProperties.user = user;
@@ -28,6 +29,10 @@ public class SqlProperties {
 	
 	public void setSession(Map<String, String> session) {
 		SqlProperties.session = session;
+	}
+	
+	public void setSkills(Map<String, String> skills) {
+		SqlProperties.skills = skills;
 	}
 
 }

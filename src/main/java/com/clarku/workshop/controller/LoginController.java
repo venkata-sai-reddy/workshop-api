@@ -8,16 +8,19 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.service.ILoginService;
+import com.clarku.workshop.service.INotificationService;
 import com.clarku.workshop.service.ISessionService;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.LoginVO.LoginValidation;
 import com.clarku.workshop.vo.SessionVO;
+import com.clarku.workshop.vo.SignUpVO;
+import com.clarku.workshop.vo.SignUpVO.SignUpValidation;
 import com.clarku.workshop.vo.UserVO;
 
 @RestController
@@ -31,6 +34,9 @@ public class LoginController {
 	@Autowired
 	ISessionService session;
 
+	@Autowired
+	INotificationService notify;
+
 	@PostMapping("login")
 	public ResponseEntity<UserVO> signIn(@Validated(LoginValidation.class) @RequestBody LoginVO loginDetails) throws GlobalException, LoginException {
 		UserVO userDetails = loginService.signIn(loginDetails);
@@ -39,9 +45,18 @@ public class LoginController {
 		userDetails.setSession(userSession);
 		return new ResponseEntity<>(userDetails, HttpStatus.OK);
 	}
+	
+	@PostMapping("signup")
+	public ResponseEntity<Boolean> signUp(@Validated(SignUpValidation.class) @RequestBody SignUpVO userDetails) throws GlobalException, EmailException {
+		Boolean isSignUpSuccess = loginService.signUpUser(userDetails);
+		if (Boolean.TRUE.equals(isSignUpSuccess)) {
+			notify.sendSuccessSignUpMail(userDetails.getEmailId(), userDetails.getFirstName());
+		}
+		return new ResponseEntity<>(isSignUpSuccess, HttpStatus.OK);
+	}
 
 	@PostMapping("logout")
-	public ResponseEntity<Boolean> logout(@RequestParam Integer sessionId) throws GlobalException {
+	public ResponseEntity<Boolean> logout(@RequestBody Integer sessionId) throws GlobalException {
 		session.endSession(sessionId);
 		return new ResponseEntity<>(true, HttpStatus.OK);
 	}

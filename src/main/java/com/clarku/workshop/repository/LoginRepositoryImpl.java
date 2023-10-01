@@ -13,6 +13,7 @@ import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.vo.LoginVO;
+import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.UserVO;
 
 import lombok.extern.log4j.Log4j2;
@@ -32,7 +33,7 @@ public class LoginRepositoryImpl implements ILoginRepo {
 	public LoginVO retrieveUserLogin(String emailId) throws GlobalException {
 		LoginVO userLoginDetails = null;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue(EMAIL_ID, emailId);
+		parameters.addValue(EMAIL_ID, emailId.toLowerCase());
 		try {
 			userLoginDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.login.get("getLoginDetailsByEmailId"), parameters, new BeanPropertyRowMapper<LoginVO>(LoginVO.class));
 		} catch (DataAccessException exp) {
@@ -111,7 +112,7 @@ public class LoginRepositoryImpl implements ILoginRepo {
 	public Boolean isUserExists(String emailId) throws GlobalException {
 		int count = 0;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue(EMAIL_ID, emailId);
+		parameters.addValue(EMAIL_ID, emailId.toLowerCase());
 		try {
 			count = namedParameterJdbcTemplate.queryForObject(SqlProperties.user.get("isUserExistsByEmail"), parameters, Integer.class);
 		} catch (DataAccessException exp) {
@@ -126,7 +127,7 @@ public class LoginRepositoryImpl implements ILoginRepo {
 	@Override
 	public Integer getUserId(String emailId) throws GlobalException {
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue(EMAIL_ID, emailId);
+		parameters.addValue(EMAIL_ID, emailId.toLowerCase());
 		Integer userId;
 		try {
 			userId = namedParameterJdbcTemplate.queryForObject(SqlProperties.user.get("getUserIdByEmail"), parameters, Integer.class);
@@ -153,6 +154,24 @@ public class LoginRepositoryImpl implements ILoginRepo {
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {
 			log.error("LoginRepositoryImpl :: saveTempPassword(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return updatedCount == 1;
+	}
+
+	@Override
+	public Boolean saveLoginDetails(SignUpVO userDetails) throws GlobalException {
+		int updatedCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(EMAIL_ID, userDetails.getEmailId().toLowerCase());
+		parameters.addValue("password", userDetails.getConfirmPassword());
+		try {
+			updatedCount = namedParameterJdbcTemplate.update(SqlProperties.login.get("saveLoginDetails"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("LoginRepositoryImpl :: saveLoginDetails(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("LoginRepositoryImpl :: saveLoginDetails(): exception {}", exp.getMessage());
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return updatedCount == 1;
