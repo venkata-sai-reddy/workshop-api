@@ -1,5 +1,8 @@
 package com.clarku.workshop.repository;
 
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -10,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import com.clarku.workshop.config.SqlProperties;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.utils.Constants;
+import com.clarku.workshop.vo.SignUpVO;
+import com.clarku.workshop.vo.SkillVO;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -37,6 +42,71 @@ public class UserRepositoryImpl implements IUserRepo{
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return firstName;
+	}
+
+	@Override
+	public Boolean saveSignUpUser(SignUpVO userDetails) throws GlobalException {
+		Integer updateCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue("firstName", userDetails.getFirstName());
+		parameters.addValue("lastName", userDetails.getLastName());
+		parameters.addValue("emailId", userDetails.getEmailId().toLowerCase());
+		parameters.addValue("phoneNumber", userDetails.getPhoneNumber());
+		parameters.addValue("type", userDetails.getUserType());
+		try {
+			updateCount = namedParameterJdbcTemplate.update(SqlProperties.user.get("saveUserProfDetails"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: saveSignUpUser(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: saveSignUpUser(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return updateCount != 0;
+	}
+
+	@Override
+	public void saveUserSkillsByName(Integer userId, List<SkillVO> newSkills) throws GlobalException {
+		int size = newSkills.size();
+		MapSqlParameterSource[] batchArgs = new MapSqlParameterSource[size];
+	    IntStream.range(0, size).forEach(i -> {
+	        MapSqlParameterSource args = new MapSqlParameterSource();
+	        args.addValue(USER_ID, userId);
+	        args.addValue("skillName", newSkills.get(i).getSkillName());
+	        batchArgs[i] = args;
+	    });
+	    try {
+			int[] updatedCount = namedParameterJdbcTemplate.batchUpdate(SqlProperties.user.get("saveUserSkillDetailsByName"), batchArgs);
+			log.debug("UserRepositoryImpl :: saveUserSkillsByName(): {} Skills Updated to user {}", updatedCount, userId);
+	    } catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: saveUserSkillsByName(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: saveUserSkillsByName(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Override
+	public void saveUserSkillsById(Integer userId, List<SkillVO> existingSkills) throws GlobalException {
+		int size = existingSkills.size();
+		MapSqlParameterSource[] batchArgs = new MapSqlParameterSource[size];
+	    IntStream.range(0, size).forEach(i -> {
+	        MapSqlParameterSource args = new MapSqlParameterSource();
+	        args.addValue(USER_ID, userId);
+	        args.addValue("skillId", existingSkills.get(i).getSkillId());
+	        batchArgs[i] = args;
+	    });
+	    try {
+			int[] updatedCount = namedParameterJdbcTemplate.batchUpdate(SqlProperties.user.get("saveUserSkillDetailsById"), batchArgs);
+			log.debug("UserRepositoryImpl :: saveUserSkillsById(): {} Skills Updated to user {}", updatedCount, userId);
+	    } catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: saveUserSkillsById(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: saveUserSkillsById(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }

@@ -1,33 +1,34 @@
 package com.clarku.workshop.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.service.ISessionService;
-import com.clarku.workshop.service.IUserService;
+import com.clarku.workshop.service.ISkillsService;
+import com.clarku.workshop.vo.SkillVO;
 
 @RestController
 @RequestMapping("/")
 @CrossOrigin("http://localhost:3000")
-public class UserController {
+public class SkillController {
 
 	@Autowired
-	IUserService userService;
+	ISkillsService skillsService;
 
 	@Autowired
 	ISessionService session;
 
-	@PostMapping("forget_password")
-	public ResponseEntity<Boolean> forgetPassword(@RequestBody String emailId) throws GlobalException, EmailException {
-		return new ResponseEntity<>(userService.resetPassword(emailId), HttpStatus.OK);
+	@GetMapping("skills")
+	public ResponseEntity<List<SkillVO>> getAllSkills( ) throws GlobalException {
+		return new ResponseEntity<>(skillsService.getAllSkills(), HttpStatus.OK);
 	}
 
 }

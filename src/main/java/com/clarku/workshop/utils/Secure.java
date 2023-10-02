@@ -6,7 +6,6 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -47,7 +46,7 @@ public class Secure {
 		SecureRandom rand = new SecureRandom();
 		String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		String numeric = "0123456789";
-		String special = "!@#$&*+-.,?";
+		String special = "!@#$&*-_.?";
 		StringBuilder pass = new StringBuilder();
 		pass.append(alpha.charAt(rand.nextInt(alpha.length())));
 		pass.append(alpha.toLowerCase().charAt(rand.nextInt(alpha.length())));

@@ -3,6 +3,7 @@ package com.clarku.workshop.repository;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.vo.LoginVO;
+import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.UserVO;
 
 public interface ILoginRepo {
@@ -23,4 +24,5 @@ public interface ILoginRepo {
 
 	Boolean saveTempPassword(Integer userId, String tempPass) throws GlobalException;
 
+	Boolean saveLoginDetails(SignUpVO userDetails) throws GlobalException;
 }
