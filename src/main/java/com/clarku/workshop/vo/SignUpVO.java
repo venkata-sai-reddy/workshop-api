@@ -15,11 +15,11 @@ import lombok.Data;
 public class SignUpVO {
 
 	@NotNull(message = "First name should be provided", groups = { SignUpValidation.class })
-	@Pattern(regexp = "^(?=.*[A-Z])[A-Za-z][A-Za-z. ]{1,20}$", message = "Enter Valid First Name", groups = { SignUpValidation.class })
+	@Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z. ]{1,30}$", message = "Enter Valid First Name", groups = { SignUpValidation.class })
 	private String firstName;
 
 	@NotNull(message = "Last name should be provided", groups = { SignUpValidation.class })
-	@Pattern(regexp = "^(?=.*[A-Z])[A-Za-z][A-Za-z. ]{1,20}$", message = "Enter Valid Last Name", groups = { SignUpValidation.class })
+	@Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z. ]{1,30}$", message = "Enter Valid Last Name", groups = { SignUpValidation.class })
 	private String lastName;
 
 	@Email(message = "Email should be valid", groups = { SignUpValidation.class })
