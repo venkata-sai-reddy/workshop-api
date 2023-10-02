@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.clarku.workshop.exception.EmailException;
@@ -26,7 +26,7 @@ public class UserController {
 	ISessionService session;
 
 	@PostMapping("forget_password")
-	public ResponseEntity<Boolean> forgetPassword(@RequestParam String emailId) throws GlobalException, EmailException {
+	public ResponseEntity<Boolean> forgetPassword(@RequestBody String emailId) throws GlobalException, EmailException {
 		return new ResponseEntity<>(userService.resetPassword(emailId), HttpStatus.OK);
 	}
 

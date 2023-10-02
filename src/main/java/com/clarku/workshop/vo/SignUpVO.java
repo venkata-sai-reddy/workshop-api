@@ -38,11 +38,11 @@ public class SignUpVO {
 	private List<SkillVO> newSkills;
 
 	@NotEmpty(message = "Password should not be empty", groups = { SignUpValidation.class })
-	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9-+!@#$&*_.?]{8,20}$", message = "Password should match requirements", groups = { SignUpValidation.class })
+	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*-_.?])[A-Za-z0-9!@#$&*-_.?]{8,20}$", message = "Create Password should match requirements", groups = { SignUpValidation.class })
 	private String createPassword;
 
 	@NotEmpty(message = "Password should not be empty", groups = { SignUpValidation.class })
-	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9-+!@#$&*_.?]{8,20}$", message = "Password should match requirements", groups = { SignUpValidation.class })
+	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$&*-_.?])[A-Za-z0-9!@#$&*-_.?]{8,20}$", message = "Confirm Password should match requirements", groups = { SignUpValidation.class })
 	private String confirmPassword;
 
 	public interface SignUpValidation {
