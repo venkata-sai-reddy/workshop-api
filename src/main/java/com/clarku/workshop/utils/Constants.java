@@ -27,4 +27,8 @@ public class Constants {
 
 	public static final String USER_NOT_EXISTS_FORGET_PASS_EXP = "Email Id does not exists, Please check and try again";
 
+	public static final String USER_EXISTS_SIGNUP_EXP = "User Already Exists, Please Sign In";
+
+	public static final String CREATE_CONFIRM_PASS_MISSMATCH_EXP = "Create and Confirm password should be same";
+
 }
