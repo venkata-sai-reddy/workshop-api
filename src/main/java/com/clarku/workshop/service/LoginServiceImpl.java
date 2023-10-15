@@ -44,7 +44,7 @@ public class LoginServiceImpl implements ILoginService {
 	@Override
 	public UserVO signIn(LoginVO loginDetails) throws GlobalException, LoginException {
 		LoginVO userLoginDetails = validateUser(loginDetails);
-		return loginRepo.retrieveUserDetails(userLoginDetails.getUserId());
+		return userRepo.retrieveUserDetails(userLoginDetails.getUserId());
 	}
 
 	private LoginVO validateUser(LoginVO loginDetails) throws GlobalException, LoginException {

@@ -14,7 +14,6 @@ import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SignUpVO;
-import com.clarku.workshop.vo.UserVO;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -43,23 +42,6 @@ public class LoginRepositoryImpl implements ILoginRepo {
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return userLoginDetails;
-	}
-
-	@Override
-	public UserVO retrieveUserDetails(Integer userId) throws LoginException {
-		UserVO userDetails;
-		MapSqlParameterSource parameters = new MapSqlParameterSource();
-		parameters.addValue(USER_ID, userId);
-		try {
-			userDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.user.get("getUserProfDetailsById"), parameters, new BeanPropertyRowMapper<UserVO>(UserVO.class));
-		} catch (DataAccessException exp) {
-			log.error("LoginRepositoryImpl :: retrieveUserDetails(): data access exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (Exception exp) {
-			log.error("LoginRepositoryImpl :: retrieveUserDetails(): exception {}", exp.getMessage());
-			throw new LoginException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return userDetails;
 	}
 
 	@Override

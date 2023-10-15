@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,7 @@ import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
+import com.clarku.workshop.vo.UserVO;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -42,6 +44,23 @@ public class UserRepositoryImpl implements IUserRepo{
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return firstName;
+	}
+
+	@Override
+	public UserVO retrieveUserDetails(Integer userId) throws GlobalException {
+		UserVO userDetails = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(USER_ID, userId);
+		try {
+			userDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.user.get("getUserProfDetailsById"), parameters, new BeanPropertyRowMapper<UserVO>(UserVO.class));
+		} catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: retrieveUserDetails(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: retrieveUserDetails(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return userDetails;
 	}
 
 	@Override
@@ -107,6 +126,22 @@ public class UserRepositoryImpl implements IUserRepo{
 			log.error("UserRepositoryImpl :: saveUserSkillsById(): exception {}", exp.getMessage());
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@Override
+	public List<SkillVO> retrieveUserSkills(Integer userId) throws GlobalException {
+		List<SkillVO> skillDetails = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(USER_ID, userId);
+		try {
+			skillDetails = namedParameterJdbcTemplate.query(SqlProperties.skills.get("getUserSkills"), parameters, new BeanPropertyRowMapper<>(SkillVO.class));
+		} catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: retrieveUserSkills(): data access exception {} {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: retrieveUserSkills(): exception : {} {}", exp.getMessage(), exp.getCause());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return skillDetails;
 	}
 
 }

@@ -3,12 +3,12 @@
  */
 package com.clarku.workshop.vo;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 
 @Data
-public class UserVO {
+public class RegisteredUserVO {
 
 	private Integer userId;
 
@@ -18,11 +18,7 @@ public class UserVO {
 
 	private String emailId;
 
-	private String phoneNumber;
-
 	private String userType;
-
-	private List<SkillVO> skills;
-
-	private SessionVO session;
+	
+	private LocalDateTime registeredDate;
 }

@@ -7,6 +7,8 @@ public interface ISessionRepo {
 
 	SessionVO retrieveSessionDetails(Integer userId) throws GlobalException;
 
+	SessionVO retrieveSession(Integer sessionId) throws GlobalException;
+
 	void createSession(Integer userId) throws GlobalException;
 
 	Boolean isActiveSessionExists(Integer userId) throws GlobalException;
