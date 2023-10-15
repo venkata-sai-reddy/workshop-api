@@ -4,11 +4,8 @@ import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SignUpVO;
-import com.clarku.workshop.vo.UserVO;
 
 public interface ILoginRepo {
-
-	UserVO retrieveUserDetails(Integer userId) throws LoginException;
 
 	LoginVO retrieveUserLogin(String emailId) throws GlobalException;
 

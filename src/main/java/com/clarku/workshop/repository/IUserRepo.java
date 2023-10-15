@@ -5,8 +5,11 @@ import java.util.List;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
+import com.clarku.workshop.vo.UserVO;
 
 public interface IUserRepo {
+
+	UserVO retrieveUserDetails(Integer userId) throws GlobalException;
 
 	String getUserFirstName(Integer userId) throws GlobalException;
 
@@ -15,5 +18,7 @@ public interface IUserRepo {
 	void saveUserSkillsByName(Integer userId, List<SkillVO> newSkills) throws GlobalException;
 
 	void saveUserSkillsById(Integer userId, List<SkillVO> existingSkills) throws GlobalException;
+
+	List<SkillVO> retrieveUserSkills(Integer userId) throws GlobalException;
 
 }

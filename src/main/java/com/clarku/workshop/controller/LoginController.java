@@ -16,6 +16,7 @@ import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.service.ILoginService;
 import com.clarku.workshop.service.INotificationService;
 import com.clarku.workshop.service.ISessionService;
+import com.clarku.workshop.service.IUserService;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.LoginVO.LoginValidation;
 import com.clarku.workshop.vo.SessionVO;
@@ -32,6 +33,9 @@ public class LoginController {
 	ILoginService loginService;
 
 	@Autowired
+	IUserService userService;
+
+	@Autowired
 	ISessionService session;
 
 	@Autowired
@@ -42,6 +46,7 @@ public class LoginController {
 		UserVO userDetails = loginService.signIn(loginDetails);
 		loginService.updateLastLogin(userDetails.getUserId());
 		SessionVO userSession = session.createSession(userDetails.getUserId());
+		userDetails.setSkills(userService.getUserSkills(userDetails.getUserId()));
 		userDetails.setSession(userSession);
 		return new ResponseEntity<>(userDetails, HttpStatus.OK);
 	}
@@ -50,7 +55,7 @@ public class LoginController {
 	public ResponseEntity<Boolean> signUp(@Validated(SignUpValidation.class) @RequestBody SignUpVO userDetails) throws GlobalException, EmailException {
 		Boolean isSignUpSuccess = loginService.signUpUser(userDetails);
 		if (Boolean.TRUE.equals(isSignUpSuccess)) {
-			notify.sendSuccessSignUpMail(userDetails.getEmailId(), userDetails.getFirstName());
+			notify.sendSuccessSignUpMail(userDetails);
 		}
 		return new ResponseEntity<>(isSignUpSuccess, HttpStatus.OK);
 	}

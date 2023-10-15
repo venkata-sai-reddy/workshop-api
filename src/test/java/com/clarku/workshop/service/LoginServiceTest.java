@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
 import com.clarku.workshop.repository.LoginRepositoryImpl;
+import com.clarku.workshop.repository.UserRepositoryImpl;
 import com.clarku.workshop.utils.Secure;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.UserVO;
@@ -30,6 +31,9 @@ public class LoginServiceTest {
 
 	@Mock
 	LoginRepositoryImpl loginRepo;
+
+	@Mock
+	UserRepositoryImpl userRepo;
 
 	@Mock
 	LoginVO loginDetails;
@@ -55,7 +59,7 @@ public class LoginServiceTest {
 	public void testSignIn_Success() throws GlobalException, LoginException {
 		Mockito.when(loginRepo.retrieveUserLogin(Mockito.anyString())).thenReturn(loginDetails);
 		Mockito.when(secure.getEncrypted(Mockito.anyString())).thenReturn(loginDetails.getPassword());
-		Mockito.when(loginRepo.retrieveUserDetails(Mockito.anyInt())).thenReturn(userDetails);
+		Mockito.when(userRepo.retrieveUserDetails(Mockito.anyInt())).thenReturn(userDetails);
 		UserVO userVO = loginService.signIn(loginDetails);
 		assertEquals(userVO.getEmailId(), userDetails.getEmailId());
 	}
@@ -71,7 +75,7 @@ public class LoginServiceTest {
 		loginDetails.setFailedLoginAttempts(0);
 		Mockito.when(loginRepo.retrieveUserLogin(Mockito.anyString())).thenReturn(loginDetails);
 		Mockito.when(secure.getEncrypted(Mockito.anyString())).thenReturn(loginDetails.getTempPassword());
-		Mockito.when(loginRepo.retrieveUserDetails(Mockito.anyInt())).thenReturn(userDetails);
+		Mockito.when(userRepo.retrieveUserDetails(Mockito.anyInt())).thenReturn(userDetails);
 		UserVO userVO = loginService.signIn(loginDetails);
 		assertEquals(userVO.getEmailId(), userDetails.getEmailId());
 	}

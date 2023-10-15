@@ -1,15 +1,20 @@
 package com.clarku.workshop.service;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
+import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.utils.EmailConstants;
 import com.clarku.workshop.utils.EmailHelper;
 import com.clarku.workshop.vo.EmailVO;
+import com.clarku.workshop.vo.SignUpVO;
+import com.clarku.workshop.vo.UserVO;
+import com.clarku.workshop.vo.WorkshopVO;
 
 @Service
 public class NotificationServiceImpl implements INotificationService {
@@ -19,14 +24,16 @@ public class NotificationServiceImpl implements INotificationService {
 
 	private static final String FIRST_NAME = "firstName";
 
+	private static final String WORKSHOP_NAME = "workshopName";
+
 	@Override
-	public void sendSuccessSignUpMail(String emailId, String firstName) throws EmailException, GlobalException {
+	public void sendSuccessSignUpMail(SignUpVO userDetails) throws EmailException, GlobalException {
 		EmailVO emailVO = new EmailVO();
-		emailVO.setSendTo(emailId);
+		emailVO.setSendTo(userDetails.getEmailId());
 		emailVO.setSubject(EmailConstants.WELCOME_SUBJECT);
-		emailVO.setTemplateName(EmailConstants.SIGNUP_SUCCESS_TEMPLATE);
+		emailVO.setTemplateName(userDetails.getUserType().equalsIgnoreCase(Constants.INSTRUCTOR) ? EmailConstants.SIGNUP_INSTRUCTOT_SUCCESS_TEMPLATE : EmailConstants.SIGNUP_SUCCESS_TEMPLATE);
 		HashMap<String, String> variables = new HashMap<>();
-		variables.put(FIRST_NAME, firstName);
+		variables.put(FIRST_NAME, userDetails.getFirstName());
 		emailVO.setVariables(variables);
 		email.sendEMail(emailVO);
 	}
@@ -42,6 +49,83 @@ public class NotificationServiceImpl implements INotificationService {
 		variables.put("tempPass", tempPass);
 		emailVO.setVariables(variables);
 		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendWorkshopCreateSuccessEmail(WorkshopVO workshopDetails, UserVO user)
+			throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(user.getEmailId());
+		emailVO.setSubject(EmailConstants.WORKSHOP_SUCCESS_CREATED_SUB);
+		emailVO.setTemplateName(EmailConstants.WORSHOP_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, user.getFirstName());
+		variables.put(WORKSHOP_NAME, workshopDetails.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendUpdatedWorkshopDetailsEmail(WorkshopVO workshopDetails, List<String> registeredUsers) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendMultipleBCCTo(registeredUsers);
+		emailVO.setSubject(EmailConstants.WORKSHOP_UPDATED_SUB+" : "+workshopDetails.getWorkshopName());
+		emailVO.setTemplateName(EmailConstants.WORSHOP_UPDATE_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(WORKSHOP_NAME, workshopDetails.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMailMultipleBCC(emailVO);
+	}
+
+	@Override
+	public void sendWorkshopUpdateSuccessEmail(WorkshopVO workshopDetails, UserVO user) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(user.getEmailId());
+		emailVO.setSubject(EmailConstants.WORKSHOP_UPDATED_SUCCESS_SUB);
+		emailVO.setTemplateName(EmailConstants.WORSHOP_UPDATED_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, user.getFirstName());
+		variables.put(WORKSHOP_NAME, workshopDetails.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendWorkshopDeletedSuccessEmail(WorkshopVO workshop, UserVO user) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(user.getEmailId());
+		emailVO.setSubject(EmailConstants.WORKSHOP_DELETED_SUCCESS_SUB);
+		emailVO.setTemplateName(EmailConstants.WORSHOP_DELETE_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, user.getFirstName());
+		variables.put(WORKSHOP_NAME, workshop.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendEnrollSuccessEmail(WorkshopVO workshop, UserVO user) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(user.getEmailId());
+		emailVO.setSubject(EmailConstants.WORKSHOP_SUCCESS_ENROLL_SUB);
+		emailVO.setTemplateName(EmailConstants.WORSHOP_ENROLL_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, user.getFirstName());
+		variables.put(WORKSHOP_NAME, workshop.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendWorkshopCancelledEmail(WorkshopVO workshop, List<String> registeredUsers) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendMultipleBCCTo(registeredUsers);
+		emailVO.setSubject(EmailConstants.WORKSHOP_CANCELED_SUB+" : "+workshop.getWorkshopName());
+		emailVO.setTemplateName(EmailConstants.WORSHOP_CANCELLED_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(WORKSHOP_NAME, workshop.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMailMultipleBCC(emailVO);
 	}
 
 }
