@@ -1,5 +1,7 @@
 package com.clarku.workshop.repository;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -26,11 +28,14 @@ public class SessionRepositoryImpl implements ISessionRepo {
 
 	private static final String SESSION_ID = "sessionId";
 
+	private static final String CURRENT_TIME = "currentTime";
+
 	@Override
 	public SessionVO retrieveSessionDetails(Integer userId) throws GlobalException {
 		SessionVO sessionDetails;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(USER_ID, userId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
 		try {
 			sessionDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.session.get("getSessionDetailsByUserId"), parameters, new BeanPropertyRowMapper<SessionVO>(SessionVO.class));
 		} catch (DataAccessException exp) {
@@ -47,6 +52,7 @@ public class SessionRepositoryImpl implements ISessionRepo {
 	public void createSession(Integer userId) throws GlobalException {
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(USER_ID, userId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
 		try {
 			namedParameterJdbcTemplate.update(SqlProperties.session.get("saveUserSession"), parameters);
 		} catch (DataAccessException exp) {
@@ -63,6 +69,7 @@ public class SessionRepositoryImpl implements ISessionRepo {
 		int count = 0;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(USER_ID, userId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
 		try {
 			count = namedParameterJdbcTemplate.queryForObject(SqlProperties.session.get("isActiveUserSessionExists"), parameters, Integer.class);
 		} catch (DataAccessException exp) {
@@ -79,6 +86,7 @@ public class SessionRepositoryImpl implements ISessionRepo {
 	public void endSession(Integer sessionId) throws GlobalException {
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(SESSION_ID, sessionId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
 		try {
 			namedParameterJdbcTemplate.update(SqlProperties.session.get("endUserSessionById"), parameters);
 		} catch (DataAccessException exp) {
@@ -94,6 +102,7 @@ public class SessionRepositoryImpl implements ISessionRepo {
 	public void updateSession(Integer sessionId) throws GlobalException {
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(SESSION_ID, sessionId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
 		try {
 			namedParameterJdbcTemplate.update(SqlProperties.session.get("updateUserSessionById"), parameters);
 		} catch (DataAccessException exp) {
@@ -110,6 +119,7 @@ public class SessionRepositoryImpl implements ISessionRepo {
 		int count = 0;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(SESSION_ID, sessionId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
 		try {
 			count = namedParameterJdbcTemplate.queryForObject(SqlProperties.session.get("isSessionActive"), parameters, Integer.class);
 		} catch (DataAccessException exp) {
@@ -120,6 +130,23 @@ public class SessionRepositoryImpl implements ISessionRepo {
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return count != 0;
+	}
+
+	@Override
+	public SessionVO retrieveSession(Integer sessionId) throws GlobalException {
+		SessionVO sessionDetails = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(SESSION_ID, sessionId);
+		parameters.addValue(CURRENT_TIME, LocalDateTime.now());
+		try {
+			sessionDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.session.get("getSessionDetailsById"), parameters, new BeanPropertyRowMapper<SessionVO>(SessionVO.class));
+		} catch (DataAccessException exp) {
+			log.error("SessionRepositoryImpl :: retrieveSession(): data access exception {}", exp.getMessage());
+		} catch (Exception exp) {
+			log.error("SessionRepositoryImpl :: retrieveSession(): exception : {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return sessionDetails;
 	}
 
 }

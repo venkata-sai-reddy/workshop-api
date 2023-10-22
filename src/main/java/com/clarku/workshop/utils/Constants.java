@@ -11,6 +11,8 @@ public class Constants {
 
 	public static final String ADMIN = "Admin";
 
+	public static final String HEADER_SESSION_ID = "sessionid";
+
 	public static final String REQUESTED = "Requested";
 
 	public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
@@ -30,5 +32,9 @@ public class Constants {
 	public static final String USER_EXISTS_SIGNUP_EXP = "User Already Exists, Please Sign In";
 
 	public static final String CREATE_CONFIRM_PASS_MISSMATCH_EXP = "Create and Confirm password should be same";
+
+	public static final Integer WORKSHOP_DEFAULT_CAPACITY = 30;
+
+	public static final String ONLINE = "Online";
 
 }

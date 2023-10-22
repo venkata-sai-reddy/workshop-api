@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.utils.EmailHelper;
+import com.clarku.workshop.vo.SignUpVO;
 
 @RunWith(SpringRunner.class)
 public class NotificationServiceTest {
@@ -24,27 +25,35 @@ public class NotificationServiceTest {
 	@Mock
 	EmailHelper email;
 
+	@Mock
+	SignUpVO signUpDetails;
+
 	@Before
 	public void initMocks() {
 		MockitoAnnotations.openMocks(this);
+		signUpDetails = new SignUpVO();
+		signUpDetails.setEmailId("user@gmail.com");
+		signUpDetails.setFirstName("firstName");
+		signUpDetails.setUserType("Student");
 	}
 
 	@Test
 	public void testSignUpMail_Success() throws GlobalException, EmailException {
-		notificationService.sendSuccessSignUpMail("user@username.com", "username");
+		notificationService.sendSuccessSignUpMail(signUpDetails);
 		assertTrue(true);
 	}
 
 	@Test(expected = EmailException.class)
 	public void testSignUpMail_EmailException() throws GlobalException, EmailException {
+		signUpDetails.setUserType("Instructor");
 		Mockito.doThrow(EmailException.class).when(email).sendEMail(Mockito.any());
-		notificationService.sendSuccessSignUpMail("user@gmail.com", "firstName");
+		notificationService.sendSuccessSignUpMail(signUpDetails);
 	}
 
 	@Test(expected = GlobalException.class)
 	public void testSignUpMail_GlobalException() throws GlobalException, EmailException {
 		Mockito.doThrow(GlobalException.class).when(email).sendEMail(Mockito.any());
-		notificationService.sendSuccessSignUpMail("username@user.com", "firstname");
+		notificationService.sendSuccessSignUpMail(signUpDetails);
 	}
 	
 	@Test

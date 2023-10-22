@@ -41,6 +41,28 @@ public class EmailHelper {
 			helper.setText(htmlContent, true);
 			mailer.send(mimeMessage);
 		} catch (MessagingException exp) {
+			log.error("Failed to send the Notification with message : \n {} \n with root cause:\n {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("Failed to send the Notification with message : \n {} \n with root cause:\n {}", exp.getMessage(), exp.getCause());
+			throw new GlobalException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	public void sendEMailMultipleBCC(EmailVO emailVO) throws GlobalException, EmailException {
+		MimeMessage mimeMessage = mailer.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+		Context context = new Context();
+		if (!emailVO.getVariables().isEmpty()) {
+			emailVO.getVariables().forEach(context::setVariable);
+		}
+
+		try {
+			helper.setBcc(emailVO.getSendMultipleBCCTo().toArray(new String[0]));
+			helper.setSubject(emailVO.getSubject());
+			String htmlContent = templateEngine.process(emailVO.getTemplateName(), context);
+			helper.setText(htmlContent, true);
+			mailer.send(mimeMessage);
+		} catch (MessagingException exp) {
 			log.error("Failed to send the Notification" + exp.getMessage());
 			throw new EmailException("Failed to Send Email, Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {

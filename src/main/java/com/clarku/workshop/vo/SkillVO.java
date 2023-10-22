@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SkillVO {
 
-	private String skillId;
+	private Integer skillId;
 
 	private String skillName;
 

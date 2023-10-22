@@ -5,12 +5,14 @@ import org.springframework.http.HttpStatus;
 public class GlobalException extends Exception {
 
 	private static final long serialVersionUID = 1L;
-
-	public GlobalException(String exp) {
-		super(exp, null, false, false);
+	private final HttpStatus httpStatus;
+	
+	public GlobalException(String message, HttpStatus httpStatus) {
+		super(message);
+		this.httpStatus = httpStatus;
 	}
 	
-	public GlobalException(String message, HttpStatus unauthorized) {
-		super(message, null, false, false);
-	}
+	public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
 }
