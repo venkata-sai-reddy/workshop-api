@@ -1,5 +1,6 @@
 package com.clarku.workshop.repository;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.clarku.workshop.exception.GlobalException;
@@ -20,5 +21,7 @@ public interface IUserRepo {
 	void saveUserSkillsById(Integer userId, List<SkillVO> existingSkills) throws GlobalException;
 
 	List<SkillVO> retrieveUserSkills(Integer userId) throws GlobalException;
+
+	HashMap<Integer, List<UserVO>> getSkilledUsers(List<Integer> skillIds) throws GlobalException;
 
 }

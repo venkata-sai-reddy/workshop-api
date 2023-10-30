@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.vo.RegisteredUserVO;
+import com.clarku.workshop.vo.RequestVO;
 import com.clarku.workshop.vo.SkillVO;
 import com.clarku.workshop.vo.WorkshopVO;
 
@@ -12,7 +13,7 @@ public interface IWorkshopRepo {
 
 	Boolean createWorkshop(WorkshopVO workshopDetails) throws GlobalException;
 
-	Boolean updateWorkshop(Map<String, Object> updatedFields) throws GlobalException;
+	Boolean updateWorkshop(Map<String, Object> updatedFields, Integer workshopId) throws GlobalException;
 
 	Boolean deleteWorkshop(Integer workshopId) throws GlobalException;
 
@@ -39,5 +40,11 @@ public interface IWorkshopRepo {
 	Boolean enrollWorkshop(Integer workshopId, Integer userId) throws GlobalException;
 
 	List<SkillVO> getWorkshopSkills(Integer workshopId) throws GlobalException;
+
+	Boolean deleteWorkshopSkillMap(Integer workshopId, List<Integer> deletedSkills) throws GlobalException;
+
+	Boolean saveUserSkillRequest(Integer userId, List<SkillVO> requestedSkills) throws GlobalException;
+
+	List<RequestVO> getRecentlyRequestedSkillRequest() throws GlobalException;
 
 }

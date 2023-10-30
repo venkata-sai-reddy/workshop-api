@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class WorkshopVO {
 
-	@NotBlank(message = "Please choose a valid workshop", groups = { WorkshopUpdateValidation.class })
+	@NotNull(message = "Please choose a valid workshop", groups = { WorkshopUpdateValidation.class })
 	private Integer workshopId;
 
 	@NotBlank(message = "Please enter a valid workshop name", groups = { WorkshopAddValidation.class })
