@@ -25,5 +25,8 @@ CREATE TABLE user_skill_dtl ( user_id INT , skill_id INT, PRIMARY KEY (user_id, 
 INSERT INTO user_type (name) VALUES ('ADMIN');
 INSERT INTO user_type (name) VALUES ('Student');
 INSERT INTO user_type (name) VALUES ('Instructor');
+INSERT INTO status_dtl (name) VALUES ('Approved');
+INSERT INTO status_dtl (name) VALUES ('Rejected');
+INSERT INTO status_dtl (name) VALUES ('Requested');
 INSERT INTO venue_dtl (venue_id, name) VALUES ('ONLINE', 'Online');
 INSERT INTO venue_dtl (venue_id, name) VALUES('JC101', 'Jonas Clark Hall 101');

@@ -1,6 +1,9 @@
 package com.clarku.workshop.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,6 +145,50 @@ public class UserRepositoryImpl implements IUserRepo{
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return skillDetails;
+	}
+
+	@Override
+	public HashMap<Integer, List<UserVO>> getSkilledUsers(List<Integer> skillIds) throws GlobalException {
+		HashMap<Integer, List<UserVO>> userDetails = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue("skillIds", skillIds);
+		try {
+			List<Map<String, Object>> usersResultMap = namedParameterJdbcTemplate.queryForList(SqlProperties.user.get("getSkilledUsersList"), parameters);
+			userDetails = wrapUserDetails(usersResultMap);
+
+		} catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: getSkilledUsers(): data access exception {} {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: getSkilledUsers(): exception : {} {}", exp.getMessage(), exp.getCause());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return userDetails;
+	}
+
+	private HashMap<Integer, List<UserVO>> wrapUserDetails(List<Map<String, Object>> usersResultMap) {
+		HashMap<Integer,  List<UserVO>> skillIdMap = new HashMap<>();
+		usersResultMap.stream().forEach(user -> {
+			SkillVO skill = new SkillVO();
+            skill.setSkillId(Integer.parseInt(user.get("skillId").toString()));
+			skill.setSkillName(user.getOrDefault("skillName", "").toString());
+			skill.setStatus(user.getOrDefault("status", "").toString());
+			UserVO userDetails = new UserVO();
+			userDetails.setEmailId(user.getOrDefault("emailId", "").toString());
+			userDetails.setFirstName(user.getOrDefault("firstName", "").toString());
+			userDetails.setLastName(user.getOrDefault("lastName", "").toString());
+			userDetails.setUserId(Integer.parseInt(user.getOrDefault("userId", "").toString()));
+			userDetails.setUserType(user.getOrDefault("userType", "").toString());
+			userDetails.setSkills(new ArrayList<>());
+			userDetails.getSkills().add(skill);
+			if( skillIdMap.containsKey(Integer.parseInt(user.get("skillId").toString()))){
+				skillIdMap.get(user.get("skillId")).add(userDetails);
+			} else {
+				List<UserVO> users = new ArrayList<>();
+				users.add(userDetails);
+				skillIdMap.put(Integer.parseInt(user.get("skillId").toString()), users);
+			}
+		});
+		return skillIdMap;
 	}
 
 }

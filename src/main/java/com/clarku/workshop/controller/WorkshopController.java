@@ -25,8 +25,10 @@ import com.clarku.workshop.service.ISessionService;
 import com.clarku.workshop.service.IUserService;
 import com.clarku.workshop.service.IWorkshopService;
 import com.clarku.workshop.utils.Constants;
+import com.clarku.workshop.vo.RequestVO;
 import com.clarku.workshop.vo.SearchWorkshopVO;
 import com.clarku.workshop.vo.SessionVO;
+import com.clarku.workshop.vo.SkillVO;
 import com.clarku.workshop.vo.UserVO;
 import com.clarku.workshop.vo.WorkshopVO;
 import com.clarku.workshop.vo.WorkshopVO.WorkshopAddValidation;
@@ -73,7 +75,7 @@ public class WorkshopController {
 		return new ResponseEntity<>(workshopDetails, HttpStatus.OK);
 	}
 
-	@GetMapping("/enroll")
+	@PostMapping("/enroll")
 	public ResponseEntity<Boolean> enrollWorkshop(@RequestHeader HttpHeaders headers, @RequestBody WorkshopVO workshop) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
 		Boolean isEnrolled = workshopService.enrollWorkshop(workshop.getWorkshopId(), session.getUserId());
@@ -86,7 +88,18 @@ public class WorkshopController {
 		return new ResponseEntity<>(isEnrolled, HttpStatus.OK);
 	}
 
-	@DeleteMapping("/delete")
+	@PostMapping("/request")
+	public ResponseEntity<Boolean> requestWorkshop(@RequestHeader HttpHeaders headers, @RequestBody List<SkillVO> skills) throws GlobalException, EmailException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		Boolean isRequestSuccess = workshopService.requestWorkshop(skills, user);
+		if (Boolean.FALSE.equals(isRequestSuccess)) {
+			throw new GlobalException("Failed to Request the Workshop", HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(isRequestSuccess, HttpStatus.OK);
+	}
+
+	@PostMapping("/delete")
 	public ResponseEntity<Boolean> deleteWorkshop(@RequestHeader HttpHeaders headers, @RequestBody WorkshopVO workshop) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
@@ -136,6 +149,13 @@ public class WorkshopController {
 		return new ResponseEntity<>(workshops, HttpStatus.OK);
 	}
 
+	@GetMapping("/requested")
+	public ResponseEntity<List<RequestVO>> getAllRequestedWorkshops(@RequestHeader HttpHeaders headers) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		List<RequestVO> skills = workshopService.getAllReqestedSkills(session.getUserId());
+		return new ResponseEntity<>(skills, HttpStatus.OK);
+	}
+
 	@PutMapping("/update")
 	public ResponseEntity<Boolean> updateWorkshop(@RequestHeader HttpHeaders headers, @Validated(WorkshopUpdateValidation.class) @RequestBody WorkshopVO workshopDetails) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
@@ -148,9 +168,11 @@ public class WorkshopController {
 		if (Boolean.TRUE.equals(isUpdated)) {
 			notify.sendWorkshopUpdateSuccessEmail(workshopDetails, user);
 			List<String> registeredUsers = workshopService.getRegisteredWorkshopUsersEmail(workshopDetails.getWorkshopId());
-			notify.sendUpdatedWorkshopDetailsEmail(workshopDetails, registeredUsers);
+			if (!registeredUsers.isEmpty()) {
+				notify.sendUpdatedWorkshopDetailsEmail(workshopDetails, registeredUsers);
+			}
 		}
-		return new ResponseEntity<>(isUpdated, HttpStatus.OK);
+		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 
 }

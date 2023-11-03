@@ -44,7 +44,6 @@ public class EmailHelper {
 			log.error("Failed to send the Notification with message : \n {} \n with root cause:\n {}", exp.getMessage(), exp.getCause());
 		} catch (Exception exp) {
 			log.error("Failed to send the Notification with message : \n {} \n with root cause:\n {}", exp.getMessage(), exp.getCause());
-			throw new GlobalException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -64,10 +63,8 @@ public class EmailHelper {
 			mailer.send(mimeMessage);
 		} catch (MessagingException exp) {
 			log.error("Failed to send the Notification" + exp.getMessage());
-			throw new EmailException("Failed to Send Email, Please try again", HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception exp) {
 			log.error("Failed to send the Notification" + exp.getMessage());
-			throw new GlobalException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

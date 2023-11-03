@@ -2,6 +2,9 @@ package com.clarku.workshop.service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import com.clarku.workshop.utils.EmailConstants;
 import com.clarku.workshop.utils.EmailHelper;
 import com.clarku.workshop.vo.EmailVO;
 import com.clarku.workshop.vo.SignUpVO;
+import com.clarku.workshop.vo.SkillVO;
 import com.clarku.workshop.vo.UserVO;
 import com.clarku.workshop.vo.WorkshopVO;
 
@@ -25,6 +29,8 @@ public class NotificationServiceImpl implements INotificationService {
 	private static final String FIRST_NAME = "firstName";
 
 	private static final String WORKSHOP_NAME = "workshopName";
+
+	private static final String SKILL_NAME = "skillName";
 
 	@Override
 	public void sendSuccessSignUpMail(SignUpVO userDetails) throws EmailException, GlobalException {
@@ -124,6 +130,34 @@ public class NotificationServiceImpl implements INotificationService {
 		emailVO.setTemplateName(EmailConstants.WORSHOP_CANCELLED_TEMPLATE);
 		HashMap<String, String> variables = new HashMap<>();
 		variables.put(WORKSHOP_NAME, workshop.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMailMultipleBCC(emailVO);
+	}
+
+	@Override
+	public void sendRequestSuccessful(UserVO user, String skillsName) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(user.getEmailId());
+		emailVO.setSubject(EmailConstants.WORKSHOP_REQUEST_SUCCESS_SUB);
+		emailVO.setTemplateName(EmailConstants.WORSHOP_REQUEST_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, user.getFirstName());
+		variables.put(SKILL_NAME, skillsName);
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendSkillRequestMail(List<UserVO> userVO, Integer skillId, Long count) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		Map<Integer, SkillVO> userSkills = userVO.stream().findAny().orElse(new UserVO()).getSkills().stream().collect(Collectors.toMap(SkillVO::getSkillId, skill -> skill));
+		List<String> userEmails = userVO.stream().map(UserVO::getEmailId).toList();
+		emailVO.setSendMultipleBCCTo(userEmails);
+		emailVO.setSubject(EmailConstants.USER_SKILL_REQUEST+" : "+userSkills.get(skillId).getSkillName());
+		emailVO.setTemplateName(EmailConstants.USER_SKILL_REQUEST_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(SKILL_NAME, userSkills.get(skillId).getSkillName());
+		variables.put("count", String.valueOf(count));
 		emailVO.setVariables(variables);
 		email.sendEMailMultipleBCC(emailVO);
 	}

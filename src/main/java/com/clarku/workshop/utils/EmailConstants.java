@@ -22,5 +22,9 @@ public class EmailConstants {
 	public static final String WORSHOP_ENROLL_SUCCESS_TEMPLATE = "workshopEnrollSuccess";
 	public static final String WORKSHOP_DELETED_SUCCESS_SUB = "Workshop Successfully Cancelled";
 	public static final String WORSHOP_DELETE_SUCCESS_TEMPLATE = "workshopCancelled";
+	public static final String WORKSHOP_REQUEST_SUCCESS_SUB = "Workshop Requested Successfully";
+	public static final String WORSHOP_REQUEST_SUCCESS_TEMPLATE = "workshopRequestSuccess";
+	public static final String USER_SKILL_REQUEST = "Students Requested for skill";
+	public static final String USER_SKILL_REQUEST_TEMPLATE = "skillRequest";
 
 }

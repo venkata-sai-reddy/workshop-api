@@ -26,4 +26,8 @@ public interface INotificationService {
 
 	void sendWorkshopCancelledEmail(WorkshopVO workshop, List<String> registeredUsers) throws GlobalException, EmailException;
 
+	void sendRequestSuccessful(UserVO user, String skillsName) throws GlobalException, EmailException;
+
+	void sendSkillRequestMail(List<UserVO> list, Integer skillId, Long count) throws GlobalException, EmailException;
+
 }
