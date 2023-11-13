@@ -24,5 +24,7 @@ public class UserVO {
 
 	private List<SkillVO> skills;
 
+	private List<SkillVO> newSkills;
+
 	private SessionVO session;
 }

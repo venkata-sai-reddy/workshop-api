@@ -22,6 +22,8 @@ public class WorkshopVO {
 
 	private Integer capacity;
 
+	private Integer enrollCount;
+
 	private Integer createdUserId;
 
 	private String createdUser;
@@ -38,6 +40,8 @@ public class WorkshopVO {
 	private LocalDateTime endTime;
 
 	private List<SkillVO> selectedSkills;
+
+	private Boolean isUserEnrolled;
 
 	public interface WorkshopAddValidation {
 	}

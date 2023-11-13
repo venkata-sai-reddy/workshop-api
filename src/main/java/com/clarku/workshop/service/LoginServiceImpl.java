@@ -54,6 +54,11 @@ public class LoginServiceImpl implements ILoginService {
 			log.error("LoginServiceImpl :: validateUser(): User {} ", loginDetails.getEmailId());
 			throw new LoginException(Constants.NOT_REGISTERED_EXP, HttpStatus.UNAUTHORIZED); 
 		}
+		if (Boolean.FALSE.equals(userLoginDetails.getIsActive())) {
+			log.error("LoginServiceImpl:: validateUser() : User is in-active " + Constants.USER_INACTIVE_EXP);
+			throw new LoginException(Constants.USER_INACTIVE_EXP, HttpStatus.UNAUTHORIZED);
+		}
+
 		if (Boolean.TRUE.equals(userLoginDetails.getIsLocked())) {
 			log.error("LoginServiceImpl:: validateUser() : " + Constants.USER_LOCKED_EXP);
 			throw new LoginException(Constants.USER_LOCKED_EXP, HttpStatus.UNAUTHORIZED);

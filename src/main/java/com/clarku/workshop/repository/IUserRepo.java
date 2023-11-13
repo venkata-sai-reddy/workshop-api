@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.clarku.workshop.exception.GlobalException;
+import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
 import com.clarku.workshop.vo.UserVO;
@@ -23,5 +24,13 @@ public interface IUserRepo {
 	List<SkillVO> retrieveUserSkills(Integer userId) throws GlobalException;
 
 	HashMap<Integer, List<UserVO>> getSkilledUsers(List<Integer> skillIds) throws GlobalException;
+
+	LoginVO retrieveUserLoginDetails(Integer userId) throws GlobalException;
+
+	Boolean updateUserPass(Integer userId, String createPassword) throws GlobalException;
+
+	Boolean updateUserProf(Integer userId, HashMap<String, String> updatedDetails) throws GlobalException;
+
+	void deleteUserSkillsById(Integer userId, List<SkillVO> deletedSkills) throws GlobalException;
 
 }

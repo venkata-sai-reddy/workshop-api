@@ -19,22 +19,24 @@ public interface IWorkshopService {
 
 	Boolean updateWorkshop(WorkshopVO workshopDetails, Integer userId) throws GlobalException;
 
-	WorkshopsTimeLineVO getAllWorkshops() throws GlobalException;
+	WorkshopsTimeLineVO getAllWorkshops(Integer userId) throws GlobalException;
 
 	WorkshopsTimeLineVO getAllCreatedWorkshops(Integer userId) throws GlobalException;
 
 	WorkshopsTimeLineVO getAllRegisteredWorkshops(Integer userId) throws GlobalException;
 
-	WorkshopVO getWorkshop(Integer workshopId) throws GlobalException;
+	WorkshopVO getWorkshop(Integer workshopId, Integer userId) throws GlobalException;
 
 	Boolean deleteWorkshop(Integer workshopId, UserVO user) throws GlobalException;
 
-	List<WorkshopVO> searchWorkshops(SearchWorkshopVO searchDetails) throws GlobalException;
+	List<WorkshopVO> searchWorkshops(SearchWorkshopVO searchDetails, Integer userId) throws GlobalException;
 
 	Boolean enrollWorkshop(Integer workshopId, Integer userId) throws GlobalException;
 
 	Boolean requestWorkshop(List<SkillVO> skills, UserVO user) throws GlobalException, EmailException;
 
 	List<RequestVO> getAllReqestedSkills(Integer userId) throws GlobalException;
+
+	Boolean unEnrollWorkshop(Integer workshopId, Integer userId) throws GlobalException;
 
 }

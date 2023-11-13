@@ -17,11 +17,11 @@ public interface IWorkshopRepo {
 
 	Boolean deleteWorkshop(Integer workshopId) throws GlobalException;
 
-	WorkshopVO retrieveWorkshop(Integer workshopId) throws GlobalException;
+	WorkshopVO retrieveWorkshop(Integer workshopId, Integer userId) throws GlobalException;
 
 	WorkshopVO getLastCrtdWrkshpByUserId(Integer userId) throws GlobalException;
 
-	List<WorkshopVO> getAllWorkshops() throws GlobalException;
+	List<WorkshopVO> getAllWorkshops(Integer userId) throws GlobalException;
 
 	List<WorkshopVO> getCreatedWorkshops(Integer userId) throws GlobalException;
 
@@ -46,5 +46,15 @@ public interface IWorkshopRepo {
 	Boolean saveUserSkillRequest(Integer userId, List<SkillVO> requestedSkills) throws GlobalException;
 
 	List<RequestVO> getRecentlyRequestedSkillRequest() throws GlobalException;
+
+	Boolean checkIsUserEnrolled(Integer userId, Integer workshopId) throws GlobalException;
+
+	void incrementWorkshopEnrollCount(Integer workshopId) throws GlobalException;
+
+	void decrementWorkshopEnrollCount(Integer workshopId) throws GlobalException;
+
+	Boolean unEnrollWorkshop(Integer workshopId, Integer userId) throws GlobalException;
+
+	void updateRequestSkillsStatus(List<Integer> skillsNotified, String status) throws GlobalException;
 
 }

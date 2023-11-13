@@ -21,6 +21,8 @@ public class Constants {
 
 	public static final String USER_LOCKED_EXP = "Account is locked, please contact helpdesk";
 
+	public static final String USER_INACTIVE_EXP = "Account is unaccessable, please contact helpdesk";
+
 	public static final String NOT_REGISTERED_EXP = "Invaild user, Please sign up to login";
 
 	public static final String SESSION_ALREADY_EXISTS_EXP = "Already Logged-in, please logout and try again";
@@ -36,5 +38,9 @@ public class Constants {
 	public static final Integer WORKSHOP_DEFAULT_CAPACITY = 30;
 
 	public static final String ONLINE = "Online";
+
+	public static final String NOTIFIED = "Notified";
+
+	public static final String REJECTED = "Rejected";
 
 }

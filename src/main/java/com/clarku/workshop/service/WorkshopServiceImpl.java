@@ -150,7 +150,7 @@ public class WorkshopServiceImpl implements IWorkshopService {
 
 	@Override
 	public Boolean updateWorkshop(WorkshopVO workshopDetails, Integer userId) throws GlobalException {
-		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopDetails.getWorkshopId());
+		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopDetails.getWorkshopId(), userId);
 		Boolean isVenueDateChange = false;
 		Map<String, Object> updatedFields =  new HashMap<>();
 		if (workshopDetails.getCapacity() != null && !workshop.getCapacity().equals(workshopDetails.getCapacity())) {
@@ -258,8 +258,8 @@ public class WorkshopServiceImpl implements IWorkshopService {
 	}
 
 	@Override
-	public WorkshopsTimeLineVO getAllWorkshops() throws GlobalException {
-		List<WorkshopVO> allWorkshops = workshopRepo.getAllWorkshops();
+	public WorkshopsTimeLineVO getAllWorkshops(Integer userId) throws GlobalException {
+		List<WorkshopVO> allWorkshops = workshopRepo.getAllWorkshops(userId);
 		return getWorkshopTimeLineMapper(allWorkshops);
 	}
 
@@ -308,8 +308,8 @@ public class WorkshopServiceImpl implements IWorkshopService {
 	}
 
 	@Override
-	public WorkshopVO getWorkshop(Integer workshopId) throws GlobalException {
-		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopId);
+	public WorkshopVO getWorkshop(Integer workshopId, Integer userId) throws GlobalException {
+		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopId, userId);
 		if (workshop == null) {
 			log.error("Workshop Not exists");
 			throw new GlobalException("Workshop Not Exists", HttpStatus.BAD_REQUEST);
@@ -320,7 +320,7 @@ public class WorkshopServiceImpl implements IWorkshopService {
 
 	@Override
 	public Boolean deleteWorkshop(Integer workshopId, UserVO user) throws GlobalException {
-		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopId);
+		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopId, user.getUserId());
 		if (workshop == null ) {
 			throw new GlobalException("Workshop does not exists", HttpStatus.BAD_REQUEST);
 		}
@@ -331,9 +331,9 @@ public class WorkshopServiceImpl implements IWorkshopService {
 	}
 
 	@Override
-	public List<WorkshopVO> searchWorkshops(SearchWorkshopVO searchDetails) throws GlobalException {
+	public List<WorkshopVO> searchWorkshops(SearchWorkshopVO searchDetails, Integer userId) throws GlobalException {
 		Boolean isSearchContains = false;
-		List<WorkshopVO> allWorkshops = workshopRepo.getAllWorkshops(); 
+		List<WorkshopVO> allWorkshops = workshopRepo.getAllWorkshops(userId); 
 		WorkshopsTimeLineVO workshops = getWorkshopTimeLineMapper(allWorkshops);
 		List<WorkshopVO> searchedWorkshops = new ArrayList<>();
 		if (!StringUtils.isBlank(searchDetails.getSkill())) {
@@ -366,6 +366,7 @@ public class WorkshopServiceImpl implements IWorkshopService {
 
 	@Override
 	public Boolean enrollWorkshop(Integer workshopId, Integer userId) throws GlobalException {
+		checkWorkshopVaccency(workshopId, userId);
 		List<WorkshopVO> workshops = workshopRepo.getEnrolledWorkshops(userId);
 		if (workshops == null ) {
 			workshops = new ArrayList<>();
@@ -374,12 +375,35 @@ public class WorkshopServiceImpl implements IWorkshopService {
 		if (workshopIds.contains(workshopId)) {
 			throw new GlobalException("Already Enrolled", HttpStatus.BAD_REQUEST);
 		}
+		workshopRepo.incrementWorkshopEnrollCount(workshopId);
 		return workshopRepo.enrollWorkshop(workshopId, userId);
+	}
+	
+	@Override
+	public Boolean unEnrollWorkshop(Integer workshopId, Integer userId) throws GlobalException {
+		checkWorkshopVaccency(workshopId, userId);
+		List<WorkshopVO> workshops = workshopRepo.getEnrolledWorkshops(userId);
+		if (workshops == null ) {
+			workshops = new ArrayList<>();
+		}
+		Set<Integer> workshopIds = workshops.stream().map(WorkshopVO::getWorkshopId).collect(Collectors.toSet());
+		if (!workshopIds.contains(workshopId)) {
+			throw new GlobalException("Not Enrolled to UnEnroll", HttpStatus.BAD_REQUEST);
+		}
+		workshopRepo.decrementWorkshopEnrollCount(workshopId);
+		return workshopRepo.unEnrollWorkshop(workshopId, userId);
+	}
+
+	private void checkWorkshopVaccency(Integer workshopId, Integer userId) throws GlobalException {
+		WorkshopVO workshopDetails = workshopRepo.retrieveWorkshop(workshopId, userId);
+		if (workshopDetails.getCapacity() <= workshopDetails.getEnrollCount()) {
+			throw new GlobalException("Capacity Full, No Vaccency", HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@Override
 	public Boolean requestWorkshop(List<SkillVO> skills, UserVO user) throws GlobalException, EmailException {
-		HashMap<String, SkillVO> skillsMap = getAllWorkshopSkillsMap();
+		HashMap<String, SkillVO> skillsMap = getAllWorkshopSkillsMap(user.getUserId());
 		List<SkillVO> requestedSkills = getValidRequestedWorkshops(skillsMap, skills);
 		Boolean isSaved = saveRequestedSkill(requestedSkills, user.getUserId());
 		if(!requestedSkills.isEmpty() && Boolean.TRUE.equals(isSaved)) {
@@ -413,8 +437,8 @@ public class WorkshopServiceImpl implements IWorkshopService {
 		return requestedSkills;		
 	}
 
-	private HashMap<String, SkillVO> getAllWorkshopSkillsMap() throws GlobalException {
-		List<WorkshopVO> workshops = workshopRepo.getAllWorkshops();
+	private HashMap<String, SkillVO> getAllWorkshopSkillsMap(Integer userId) throws GlobalException {
+		List<WorkshopVO> workshops = workshopRepo.getAllWorkshops(userId);
 		workshops = getWorkshopTimeLineMapper(workshops).getUpComingWorkshops();
 		HashMap<String, SkillVO> skillsMap = new HashMap<>();
 		workshops.stream().map(WorkshopVO::getSelectedSkills).forEach(
