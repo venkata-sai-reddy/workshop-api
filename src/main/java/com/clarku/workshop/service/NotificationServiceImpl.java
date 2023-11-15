@@ -3,7 +3,6 @@ package com.clarku.workshop.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,6 +159,43 @@ public class NotificationServiceImpl implements INotificationService {
 		variables.put("count", String.valueOf(count));
 		emailVO.setVariables(variables);
 		email.sendEMailMultipleBCC(emailVO);
+	}
+
+	@Override
+	public void sendUnEnrollSuccessEmail(WorkshopVO workshop, UserVO user) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(user.getEmailId());
+		emailVO.setSubject(EmailConstants.WORKSHOP_SUCCESS_UNENROLL_SUB);
+		emailVO.setTemplateName(EmailConstants.WORSHOP_UNENROLL_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, user.getFirstName());
+		variables.put(WORKSHOP_NAME, workshop.getWorkshopName());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendPasswordChangeEmail(String emailId, String firstName) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(emailId);
+		emailVO.setSubject(EmailConstants.USER_PASS_CHANGED_SUB);
+		emailVO.setTemplateName(EmailConstants.USER_PASS_CHANGE_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, firstName);
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendProfileUpdateEmail(String emailId, String firstName) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(emailId);
+		emailVO.setSubject(EmailConstants.USER_PROFILE_CHANGED_SUB);
+		emailVO.setTemplateName(EmailConstants.USER_PROFILE_CHANGE_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, firstName);
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
 	}
 
 }

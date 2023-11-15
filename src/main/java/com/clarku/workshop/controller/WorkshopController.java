@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.clarku.workshop.exception.EmailException;
@@ -69,9 +69,9 @@ public class WorkshopController {
 	}
 
 	@GetMapping("/view")
-	public ResponseEntity<WorkshopVO> createWorkshop(@RequestHeader HttpHeaders headers, @RequestBody Integer workshopId) throws GlobalException, EmailException {
-		authService.retrieveSession(headers);
-		WorkshopVO workshopDetails = workshopService.getWorkshop(workshopId);
+	public ResponseEntity<WorkshopVO> createWorkshop(@RequestHeader HttpHeaders headers, @RequestParam Integer workshopId) throws GlobalException, EmailException {
+		SessionVO session = authService.retrieveSession(headers);
+		WorkshopVO workshopDetails = workshopService.getWorkshop(workshopId, session.getUserId());
 		return new ResponseEntity<>(workshopDetails, HttpStatus.OK);
 	}
 
@@ -86,6 +86,19 @@ public class WorkshopController {
 			notify.sendEnrollSuccessEmail(workshop, user);
 		}
 		return new ResponseEntity<>(isEnrolled, HttpStatus.OK);
+	}
+	
+	@PostMapping("/unenroll")
+	public ResponseEntity<Boolean> unEnrollWorkshop(@RequestHeader HttpHeaders headers, @RequestBody WorkshopVO workshop) throws GlobalException, EmailException {
+		SessionVO session = authService.retrieveSession(headers);
+		Boolean isUnEnrolled = workshopService.unEnrollWorkshop(workshop.getWorkshopId(), session.getUserId());
+		UserVO user = userService.getUser(session.getUserId());
+		if (Boolean.FALSE.equals(isUnEnrolled)) {
+			throw new GlobalException("Failed to Enroll", HttpStatus.BAD_REQUEST);
+		} else {
+			notify.sendUnEnrollSuccessEmail(workshop, user);
+		}
+		return new ResponseEntity<>(isUnEnrolled, HttpStatus.OK);
 	}
 
 	@PostMapping("/request")
@@ -119,15 +132,15 @@ public class WorkshopController {
 
 	@PostMapping("/search")
 	public ResponseEntity<List<WorkshopVO>> searchWorkshop(@RequestHeader HttpHeaders headers, @RequestBody SearchWorkshopVO searchDetails) throws GlobalException, EmailException {
-		authService.retrieveSession(headers);
-		List<WorkshopVO> workshops = workshopService.searchWorkshops(searchDetails);
+		SessionVO session = authService.retrieveSession(headers);
+		List<WorkshopVO> workshops = workshopService.searchWorkshops(searchDetails, session.getUserId());
 		return new ResponseEntity<>(workshops, HttpStatus.OK);
 	}
 
 	@GetMapping("/all")
 	public ResponseEntity<WorkshopsTimeLineVO> getAllWorkshops(@RequestHeader HttpHeaders headers) throws GlobalException {
-		authService.retrieveSession(headers);
-		WorkshopsTimeLineVO workshops = workshopService.getAllWorkshops();
+		SessionVO session = authService.retrieveSession(headers);
+		WorkshopsTimeLineVO workshops = workshopService.getAllWorkshops(session.getUserId());
 		return new ResponseEntity<>(workshops, HttpStatus.OK);
 	}
 

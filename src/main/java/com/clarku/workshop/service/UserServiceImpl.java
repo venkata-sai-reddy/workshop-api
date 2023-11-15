@@ -1,6 +1,10 @@
 package com.clarku.workshop.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,10 +16,12 @@ import com.clarku.workshop.repository.ILoginRepo;
 import com.clarku.workshop.repository.IUserRepo;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.utils.Secure;
+import com.clarku.workshop.vo.ChangePassVO;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SkillVO;
 import com.clarku.workshop.vo.UserVO;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -66,6 +72,72 @@ public class UserServiceImpl implements IUserService {
 	@Override
 	public List<SkillVO> getUserSkills(Integer userId) throws GlobalException {
 		return userRepo.retrieveUserSkills(userId);
+	}
+
+	@Override
+	public Boolean changePassword(Integer userId, ChangePassVO passVO) throws GlobalException {
+		LoginVO loginDetails = userRepo.retrieveUserLoginDetails(userId);
+		if (loginDetails.getTempPassword() != null && !StringUtils.isBlank(loginDetails.getTempPassword())) {
+			if (!secure.getEncrypted(passVO.getCurrentPassword()).equals(loginDetails.getTempPassword())) {
+				throw new GlobalException("Wrong Current Password", HttpStatus.BAD_REQUEST);
+			}
+		}else {
+			if (!secure.getEncrypted(passVO.getCurrentPassword()).equals(loginDetails.getPassword())) {
+				throw new GlobalException("Wrong Current Password", HttpStatus.BAD_REQUEST);
+			}
+		}
+		if (passVO.getCurrentPassword().equals(passVO.getCreatePassword())) {
+			throw new GlobalException("Existing and New password should not be same", HttpStatus.BAD_REQUEST);
+		}
+		if (!passVO.getCreatePassword().equals(passVO.getConfirmPassword())) {
+			throw new GlobalException("Create and Confirm password should be same", HttpStatus.BAD_REQUEST);
+		}
+		return userRepo.updateUserPass(userId, secure.getEncrypted(passVO.getCreatePassword()));
+	}
+
+	@Override
+	public Boolean updateUser(UserVO existingUser, UserVO updatedUser) throws GlobalException {
+		HashMap<String, String> updatedDetails = new HashMap<>();
+		if (!existingUser.getFirstName().equals(updatedUser.getFirstName())) {
+			updatedDetails.put("firstName", updatedUser.getFirstName());
+		}
+		if (!existingUser.getLastName().equals(updatedUser.getLastName())) {
+			updatedDetails.put("lastName", updatedUser.getLastName());
+		}
+		if (!existingUser.getPhoneNumber().equals(updatedUser.getPhoneNumber())) {
+			updatedDetails.put("phoneNumber", updatedUser.getPhoneNumber());
+		}
+		if (!existingUser.getEmailId().equals(updatedUser.getEmailId())) {
+			updatedDetails.put("emailId", updatedUser.getEmailId());
+		}
+		Boolean isUpdated = checkSkillsChange(existingUser, updatedUser);
+
+		return isUpdated || userRepo.updateUserProf(existingUser.getUserId(), updatedDetails);
+	}
+
+	private Boolean checkSkillsChange(UserVO existingUser, UserVO updatedUser) throws GlobalException {
+		List<SkillVO> userSkills = userRepo.retrieveUserSkills(existingUser.getUserId());
+		List<SkillVO> addedSkills = new ArrayList<>();
+		List<SkillVO> deletedSkills = new ArrayList<>();
+		Map<Integer, String> userSkillsMap = userSkills.stream().collect(Collectors.toMap(SkillVO::getSkillId, skill -> skill.getSkillName().toLowerCase()));
+		updatedUser.getSkills().stream().forEach(skill -> { 
+			if (!userSkillsMap.containsKey(skill.getSkillId())) {
+				addedSkills.add(skill);
+			}
+		});
+		Map<Integer, String> updatedUserSkillsMap = updatedUser.getSkills().stream().collect(Collectors.toMap(SkillVO::getSkillId, skill -> skill.getSkillName().toLowerCase()));
+		userSkills.stream().forEach(skill -> { 
+			if (!updatedUserSkillsMap.containsKey(skill.getSkillId())) {
+				deletedSkills.add(skill);
+			}
+		});
+		
+		userRepo.saveUserSkillsById(existingUser.getUserId(), addedSkills);
+		userRepo.deleteUserSkillsById(existingUser.getUserId(), deletedSkills);
+		if (updatedUser.getNewSkills() != null) {
+			userRepo.saveUserSkillsByName(existingUser.getUserId(), updatedUser.getNewSkills());
+		}
+		return !addedSkills.isEmpty() || !deletedSkills.isEmpty() || updatedUser.getNewSkills() != null;
 	}
 
 }

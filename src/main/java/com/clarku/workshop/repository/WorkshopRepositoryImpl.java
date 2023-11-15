@@ -219,10 +219,11 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 	}
 
 	@Override
-	public WorkshopVO retrieveWorkshop(Integer workshopId) throws GlobalException {
+	public WorkshopVO retrieveWorkshop(Integer workshopId, Integer userId) throws GlobalException {
 		WorkshopVO workshopDetails = null;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(WORKSHOP_ID, workshopId);
+		parameters.addValue(USER_ID, userId);
 		try {
 			List<Map<String, Object>> workshopResultMap = namedParameterJdbcTemplate.queryForList(SqlProperties.workshop.get("getWorkshopById"), parameters);
 			workshopDetails = wrapWorkshopDetails(workshopResultMap).get(0);
@@ -236,9 +237,10 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 	}
 
 	@Override
-	public List<WorkshopVO> getAllWorkshops() throws GlobalException {
+	public List<WorkshopVO> getAllWorkshops(Integer userId) throws GlobalException {
 		List<WorkshopVO> workshopDetails = null;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(USER_ID, userId);
 		try {
 			List<Map<String, Object>> workshopResultMap = namedParameterJdbcTemplate.queryForList(SqlProperties.workshop.get("getAllWorkshops"), parameters);
 			workshopDetails = wrapWorkshopDetails(workshopResultMap);
@@ -266,6 +268,8 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 				workshopVO.setWorkshopId(Integer.parseInt(workshop.get(WORKSHOP_ID).toString()));
 	            workshopVO.setWorkshopName(workshop.getOrDefault("workshopName", "").toString());
 	            workshopVO.setCapacity(Integer.parseInt(workshop.getOrDefault("capacity", 30).toString()));
+	            workshopVO.setEnrollCount(Integer.parseInt(workshop.getOrDefault("enrollCount", "0").toString()));
+	            workshopVO.setIsUserEnrolled(Boolean.parseBoolean(workshop.getOrDefault("enrolled", "false").toString()));
 	            workshopVO.setDescription(workshop.getOrDefault("description", "").toString());
 	            workshopVO.setCreatedDate(LocalDateTime.parse(workshop.getOrDefault("createdDate", "").toString(), DATE_TIME_FORMATTER));
 	            workshopVO.setCreatedUser(workshop.getOrDefault("createdUser", "").toString());
@@ -406,6 +410,23 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 	}
 
 	@Override
+	public Boolean unEnrollWorkshop(Integer workshopId, Integer userId) throws GlobalException {
+		Integer saveCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		parameters.addValue(USER_ID, userId);
+		try {
+			saveCount = namedParameterJdbcTemplate.update(SqlProperties.workshop.get("deleteUserEnrollment"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: unEnrollWorkshop(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: unEnrollWorkshop(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return saveCount != 0;
+	}
+
+	@Override
 	public List<SkillVO> getWorkshopSkills(Integer workshopId) throws GlobalException {
 		List<SkillVO> skillDetails = null;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
@@ -432,6 +453,7 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 	        args.addValue(USER_ID, userId);
 	        args.addValue("skillName", requestedSkills.get(i).getSkillName());
 	        args.addValue("requestedDate", requestedDate);
+	        args.addValue("status", Constants.REQUESTED);
 	        batchArgs[i] = args;
 	    });
 	    try {
@@ -458,6 +480,73 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return requestDetails;
+	}
+
+	@Override
+	public Boolean checkIsUserEnrolled(Integer userId, Integer workshopId) throws GlobalException {
+		List<Map<String, Object>> result = new ArrayList<>();
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		parameters.addValue(USER_ID, userId);
+		try {
+			result = namedParameterJdbcTemplate.queryForList(SqlProperties.workshop.get("checkIsUserEnrolled"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: checkIsUserEnrolled(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: checkIsUserEnrolled(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return !result.isEmpty();
+	}
+
+	@Override
+	public void incrementWorkshopEnrollCount(Integer workshopId) throws GlobalException {
+		Integer updateCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		try {
+			updateCount = namedParameterJdbcTemplate.update(SqlProperties.workshop.get("incrementWorkshopEnrollCount"), parameters);
+			log.info("WorkshopRepositoryImpl :: incrementWorkshopEnrollCount(): Update Count : {}", updateCount);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: incrementWorkshopEnrollCount(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: incrementWorkshopEnrollCount(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Override
+	public void decrementWorkshopEnrollCount(Integer workshopId) throws GlobalException {
+		Integer updateCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		try {
+			updateCount = namedParameterJdbcTemplate.update(SqlProperties.workshop.get("decrementWorkshopEnrollCount"), parameters);
+			log.info("WorkshopRepositoryImpl :: decrementWorkshopEnrollCount(): Update Count : {}", updateCount);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: decrementWorkshopEnrollCount(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: decrementWorkshopEnrollCount(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Override
+	public void updateRequestSkillsStatus(List<Integer> skillsNotified, String status) throws GlobalException {
+		int updateCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue("skillIds", skillsNotified);
+		parameters.addValue("status", status);
+		try {
+			updateCount = namedParameterJdbcTemplate.update(SqlProperties.workshop.get("updateSkillRequestNotified"), parameters);
+			log.info("Updated the requested to notified count : {}", updateCount);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: updateRequestSkillsStatus(): data access exception {} {}", exp.getMessage(), exp.getCause());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: updateRequestSkillsStatus(): exception {} {}", exp.getMessage(), exp.getCause());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }

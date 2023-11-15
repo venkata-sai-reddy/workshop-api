@@ -50,7 +50,7 @@ public class LoginController {
 		userDetails.setSession(userSession);
 		return new ResponseEntity<>(userDetails, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("signup")
 	public ResponseEntity<Boolean> signUp(@Validated(SignUpValidation.class) @RequestBody SignUpVO userDetails) throws GlobalException, EmailException {
 		Boolean isSignUpSuccess = loginService.signUpUser(userDetails);

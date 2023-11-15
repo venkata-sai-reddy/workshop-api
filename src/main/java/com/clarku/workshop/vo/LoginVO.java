@@ -25,6 +25,8 @@ public class LoginVO {
 
 	private Boolean isLocked;
 
+	private Boolean isActive;
+
 	public interface LoginValidation {
 
 	}

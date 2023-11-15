@@ -30,4 +30,10 @@ public interface INotificationService {
 
 	void sendSkillRequestMail(List<UserVO> list, Integer skillId, Long count) throws GlobalException, EmailException;
 
+	void sendUnEnrollSuccessEmail(WorkshopVO workshop, UserVO user) throws GlobalException, EmailException;
+
+	void sendPasswordChangeEmail(String emailId, String firstName) throws GlobalException, EmailException;
+
+	void sendProfileUpdateEmail(String emailId, String firstName) throws GlobalException, EmailException;
+
 }
