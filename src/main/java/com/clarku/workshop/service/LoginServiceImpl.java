@@ -88,8 +88,9 @@ public class LoginServiceImpl implements ILoginService {
 	public Boolean signUpUser(SignUpVO userDetails) throws GlobalException {
 		validateSignUpDetails(userDetails);
 		userRepo.saveSignUpUser(userDetails);
-		Boolean isSaved = loginRepo.saveLoginDetails(userDetails);
 		Integer userId = loginRepo.getUserId(userDetails.getEmailId());
+		userDetails.setUserId(userId);
+		Boolean isSaved = loginRepo.saveLoginDetails(userDetails);
 		if (!ObjectUtils.isEmpty(userDetails.getNewSkills())) {
 			validateAndSaveNewSkills(userId, userDetails.getNewSkills());
 		}
@@ -124,6 +125,17 @@ public class LoginServiceImpl implements ILoginService {
 			throw new GlobalException(Constants.CREATE_CONFIRM_PASS_MISSMATCH_EXP, HttpStatus.BAD_REQUEST);
 		}
 		userDetails.setConfirmPassword(secure.getEncrypted(userDetails.getConfirmPassword()));
+	}
+
+	@Override
+	public Boolean createUser(SignUpVO userDetails) throws GlobalException {
+		if (Boolean.TRUE.equals(loginRepo.isUserExists(userDetails.getEmailId()))) {
+			throw new GlobalException(Constants.USER_EXISTS_SIGNUP_EXP, HttpStatus.BAD_REQUEST);
+		}
+		userDetails.setCreatePassword("****");
+		userDetails.setConfirmPassword("****");
+		Boolean isUserSaved = userRepo.saveSignUpUser(userDetails);
+		return isUserSaved && loginRepo.saveLoginDetails(userDetails);
 	}
 
 }

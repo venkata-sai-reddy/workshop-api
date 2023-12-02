@@ -85,4 +85,21 @@ public class SkillsRepositoryImpl implements ISkillsRepo{
 		return allSkills;
 	}
 
+	@Override
+	public Boolean updateSkillStatus(SkillVO skill) throws GlobalException {
+		int updateCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue("skillId", skill.getSkillId());
+		parameters.addValue("status", skill.getStatus());
+		try {
+			updateCount = namedParameterJdbcTemplate.update(SqlProperties.skills.get("updateSkillStatus"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("SkillsRepositoryImpl :: updateSkillStatus(): data access exception {} {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("SkillsRepositoryImpl :: updateSkillStatus(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return updateCount != 0;
+	}
+
 }

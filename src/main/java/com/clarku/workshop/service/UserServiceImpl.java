@@ -19,6 +19,7 @@ import com.clarku.workshop.utils.Secure;
 import com.clarku.workshop.vo.ChangePassVO;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SkillVO;
+import com.clarku.workshop.vo.UserProfileVO;
 import com.clarku.workshop.vo.UserVO;
 
 import io.micrometer.common.util.StringUtils;
@@ -138,6 +139,18 @@ public class UserServiceImpl implements IUserService {
 			userRepo.saveUserSkillsByName(existingUser.getUserId(), updatedUser.getNewSkills());
 		}
 		return !addedSkills.isEmpty() || !deletedSkills.isEmpty() || updatedUser.getNewSkills() != null;
+	}
+
+	@Override
+	public List<UserProfileVO> getUsers() throws GlobalException {
+		return userRepo.getUsers();
+	}
+
+	@Override
+	public String generateTempPassword(Integer userId) throws GlobalException {
+		String tempPass = secure.generateTempPass();
+		loginRepo.saveTempPassword(userId, secure.getEncrypted(tempPass));
+		return tempPass;
 	}
 
 }

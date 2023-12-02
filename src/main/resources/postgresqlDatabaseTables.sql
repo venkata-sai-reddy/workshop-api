@@ -1,6 +1,6 @@
 CREATE TABLE user_type ( code serial PRIMARY KEY, name VARCHAR (255) NOT NULL );
 
-CREATE TABLE user_prof ( user_id serial PRIMARY KEY, first_name VARCHAR (100) NOT NULL, last_name VARCHAR (100) NOT NULL, email_id VARCHAR (255) UNIQUE NOT NULL, phn_num VARCHAR (10) NOT NULL, user_type_code INT NOT NULL, registered_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP , FOREIGN KEY (user_type_code) REFERENCES user_type (code) );
+CREATE TABLE user_prof ( user_id serial PRIMARY KEY, first_name VARCHAR (100) NOT NULL, last_name VARCHAR (100) NOT NULL, email_id VARCHAR (255) UNIQUE NOT NULL, phn_num VARCHAR (10), user_type_code INT NOT NULL, registered_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP , FOREIGN KEY (user_type_code) REFERENCES user_type (code) );
 
 CREATE TABLE login_dtl ( user_id INT PRIMARY KEY, email_id VARCHAR (100) UNIQUE NOT NULL, password VARCHAR (100) NOT NULL, temp_password VARCHAR (100), locked BOOLEAN DEFAULT false, active BOOLEAN DEFAULT true, un_suc_atmpt NUMERIC (1) DEFAULT 0, last_login TIMESTAMP, FOREIGN KEY (user_id) REFERENCES user_prof (user_id) ON DELETE CASCADE );
 
@@ -21,6 +21,8 @@ CREATE TABLE workshop_register_dtl ( register_id serial PRIMARY KEY, workshop_id
 CREATE TABLE workshop_request_dtl (request_id serial PRIMARY KEY, req_user_id INT NOT NULL, req_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, skill_id INT, status_code INT NOT NULL, FOREIGN KEY (status_code) REFERENCES status_dtl(code), FOREIGN KEY (req_user_id) REFERENCES user_prof (user_id) ON DELETE CASCADE, FOREIGN KEY (skill_id) REFERENCES skill_dtl (skill_id));
 
 CREATE TABLE user_skill_dtl ( user_id INT , skill_id INT, PRIMARY KEY (user_id, skill_id), FOREIGN KEY (user_id) REFERENCES user_prof (user_id) ON DELETE CASCADE, FOREIGN KEY (skill_id) REFERENCES skill_dtl (skill_id) );
+
+CREATE TABLE workshop_meeting_dtl(workshop_id INT, meeting_url text, PRIMARY KEY (workshop_id), FOREIGN KEY (workshop_id) REFERENCES workshop_dtl (workshop_id) ON DELETE CASCADE);
 
 INSERT INTO user_type (name) VALUES ('ADMIN');
 INSERT INTO user_type (name) VALUES ('Student');

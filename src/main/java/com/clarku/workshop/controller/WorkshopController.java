@@ -69,7 +69,7 @@ public class WorkshopController {
 	}
 
 	@GetMapping("/view")
-	public ResponseEntity<WorkshopVO> createWorkshop(@RequestHeader HttpHeaders headers, @RequestParam Integer workshopId) throws GlobalException, EmailException {
+	public ResponseEntity<WorkshopVO> viewWorkshop(@RequestHeader HttpHeaders headers, @RequestParam Integer workshopId) throws GlobalException {
 		SessionVO session = authService.retrieveSession(headers);
 		WorkshopVO workshopDetails = workshopService.getWorkshop(workshopId, session.getUserId());
 		return new ResponseEntity<>(workshopDetails, HttpStatus.OK);

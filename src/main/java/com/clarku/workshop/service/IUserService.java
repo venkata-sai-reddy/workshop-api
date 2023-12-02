@@ -6,6 +6,7 @@ import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.vo.ChangePassVO;
 import com.clarku.workshop.vo.SkillVO;
+import com.clarku.workshop.vo.UserProfileVO;
 import com.clarku.workshop.vo.UserVO;
 
 public interface IUserService {
@@ -19,5 +20,9 @@ public interface IUserService {
 	Boolean changePassword(Integer userId, ChangePassVO passVO) throws GlobalException;
 
 	Boolean updateUser(UserVO user, UserVO updatedUser) throws GlobalException;
+
+	List<UserProfileVO> getUsers() throws GlobalException;
+
+	String generateTempPassword(Integer userId) throws GlobalException;
 
 }

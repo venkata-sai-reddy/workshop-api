@@ -7,6 +7,7 @@ import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
+import com.clarku.workshop.vo.UserProfileVO;
 import com.clarku.workshop.vo.UserVO;
 
 public interface IUserRepo {
@@ -32,5 +33,7 @@ public interface IUserRepo {
 	Boolean updateUserProf(Integer userId, HashMap<String, String> updatedDetails) throws GlobalException;
 
 	void deleteUserSkillsById(Integer userId, List<SkillVO> deletedSkills) throws GlobalException;
+
+	List<UserProfileVO> getUsers() throws GlobalException;
 
 }

@@ -278,6 +278,7 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 	            workshopVO.setStartTime(LocalDateTime.parse(workshop.getOrDefault("startTime", "").toString(), DATE_TIME_FORMATTER));
 	            workshopVO.setVenue(workshop.getOrDefault("venue", "").toString());
 	            workshopVO.setWorkshopDate(workshop.getOrDefault("workshopDate", "").toString());
+	            workshopVO.setMeetingURL(String.valueOf(workshop.getOrDefault("meetingUrl", "")));
 	            workshopVO.setSelectedSkills(new ArrayList<>());
 	            SkillVO skill = new SkillVO();
 				skill.setSkillId(Integer.parseInt(workshop.get("skillId").toString()));
@@ -547,6 +548,72 @@ public class WorkshopRepositoryImpl implements IWorkshopRepo{
 			log.error("WorkshopRepositoryImpl :: updateRequestSkillsStatus(): exception {} {}", exp.getMessage(), exp.getCause());
 			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@Override
+	public Boolean isUserCreatedWorkshop(Integer userId, Integer workshopId) throws GlobalException {
+		List<Map<String, Object>> result = new ArrayList<>();
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		parameters.addValue(USER_ID, userId);
+		try {
+			result = namedParameterJdbcTemplate.queryForList(SqlProperties.workshop.get("checkIsUserCreatedWorkshop"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: isUserCreatedWorkshop(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: isUserCreatedWorkshop(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return !result.isEmpty();
+	}
+
+	@Override
+	public Boolean saveOrUpdateWorkshopMettingDetails(Integer workshopId, String meetingURL) throws GlobalException {
+		int saveCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		parameters.addValue("meetingUrl", meetingURL);
+		try {
+			saveCount = namedParameterJdbcTemplate.update(SqlProperties.workshop.get("saveWorkshopMeetingdetails"), parameters);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: saveWorkshopMettingDetails(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: saveWorkshopMettingDetails(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return saveCount != 0;
+	}
+
+	@Override
+	public String getWorkshopMeetingDetails(Integer workshopId) throws GlobalException {
+		String meetingUrl = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(WORKSHOP_ID, workshopId);
+		try {
+			meetingUrl = namedParameterJdbcTemplate.queryForObject(SqlProperties.workshop.get("getWorkshopMeetingURL"), parameters, String.class);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: getWorkshopMeetingDetails(): data access exception {}, {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: getWorkshopMeetingDetails(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return meetingUrl;
+	}
+
+	@Override
+	public List<WorkshopVO> getNextTwoDaysWorkshops() throws GlobalException {
+		List<WorkshopVO> workshopDetails = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		try {
+			List<Map<String, Object>> workshopResultMap = namedParameterJdbcTemplate.queryForList(SqlProperties.workshop.get("getNextTwoDaysWorkshops"), parameters);
+			workshopDetails = wrapWorkshopDetails(workshopResultMap);
+		} catch (DataAccessException exp) {
+			log.error("WorkshopRepositoryImpl :: getNextTwoDaysWorkshops(): data access exception {}", exp.getMessage());
+		} catch (Exception exp) {
+			log.error("WorkshopRepositoryImpl :: getNextTwoDaysWorkshops(): exception : {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return workshopDetails;
 	}
 
 }

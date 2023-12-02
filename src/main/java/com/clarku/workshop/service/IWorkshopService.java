@@ -39,4 +39,6 @@ public interface IWorkshopService {
 
 	Boolean unEnrollWorkshop(Integer workshopId, Integer userId) throws GlobalException;
 
+	Boolean IsUserCreatedWorkshop(Integer userId, Integer workshopId) throws GlobalException;
+
 }

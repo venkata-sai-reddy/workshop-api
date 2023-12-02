@@ -10,6 +10,8 @@ public class EmailConstants {
 	public static final String SIGNUP_INSTRUCTOT_SUCCESS_TEMPLATE = "signUpInstructorSuccess";
 	public static final String RESET_PASS_SUBJECT = "Password Reset Successful, Temporary Credentials";
 	public static final String RESET_PASS_SUCCESS_TEMPLATE = "resetPassSuccess";
+	public static final String TEMP_PASS_SUBJECT = "Temporary Credentials";
+	public static final String TEMP_PASS_SUCCESS_TEMPLATE = "tempPassSuccess";
 	public static final String WORKSHOP_SUCCESS_CREATED_SUB = "Workshop Successfully Created";
 	public static final String WORSHOP_SUCCESS_TEMPLATE = "workshopSuccess";
 	public static final String WORKSHOP_UPDATED_SUB = "Workshop Updated ";
@@ -32,5 +34,8 @@ public class EmailConstants {
 	public static final String USER_PASS_CHANGE_TEMPLATE = "userPassChange";
 	public static final String USER_PROFILE_CHANGED_SUB = "Profile Updated Successfully";
 	public static final String USER_PROFILE_CHANGE_TEMPLATE = "userProfChange";
+	public static final String CUSTOM_MESSAGE_NOTIFCATION = "customMessageTemp";
+	public static final String WORKSHOP_NOTIFICATION_SUB = "Upcoming Workshop ";
+	public static final String WORKSHOP_NOTIFICATION_TEMP = "workshopNotify";
 
 }

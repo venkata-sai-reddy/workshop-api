@@ -13,7 +13,9 @@ import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.utils.EmailConstants;
 import com.clarku.workshop.utils.EmailHelper;
+import com.clarku.workshop.vo.CustomMessageVO;
 import com.clarku.workshop.vo.EmailVO;
+import com.clarku.workshop.vo.RegisteredUserVO;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
 import com.clarku.workshop.vo.UserVO;
@@ -39,6 +41,7 @@ public class NotificationServiceImpl implements INotificationService {
 		emailVO.setTemplateName(userDetails.getUserType().equalsIgnoreCase(Constants.INSTRUCTOR) ? EmailConstants.SIGNUP_INSTRUCTOT_SUCCESS_TEMPLATE : EmailConstants.SIGNUP_SUCCESS_TEMPLATE);
 		HashMap<String, String> variables = new HashMap<>();
 		variables.put(FIRST_NAME, userDetails.getFirstName());
+		variables.put("emailId", userDetails.getEmailId());
 		emailVO.setVariables(variables);
 		email.sendEMail(emailVO);
 	}
@@ -196,6 +199,66 @@ public class NotificationServiceImpl implements INotificationService {
 		variables.put(FIRST_NAME, firstName);
 		emailVO.setVariables(variables);
 		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendCustomMessageToUsers(UserVO user, CustomMessageVO messageVO)
+			throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendMultipleBCCTo(messageVO.getSendTo());
+		emailVO.setSubject(messageVO.getSubject());
+		emailVO.setTemplateName(EmailConstants.CUSTOM_MESSAGE_NOTIFCATION);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put("message", messageVO.getMessage());
+		variables.put("userName", user.getFirstName());
+		emailVO.setVariables(variables);
+		email.sendEMailMultipleBCC(emailVO);
+		
+	}
+
+	@Override
+	public void sendSuccessCreateUserMail(SignUpVO createdUser) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(createdUser.getEmailId());
+		emailVO.setSubject(EmailConstants.WELCOME_SUBJECT);
+		emailVO.setTemplateName(createdUser.getUserType().equalsIgnoreCase(Constants.INSTRUCTOR) ? EmailConstants.SIGNUP_INSTRUCTOT_SUCCESS_TEMPLATE : EmailConstants.SIGNUP_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, createdUser.getFirstName());
+		variables.put("emailId", createdUser.getEmailId());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendSuccessTemporaryPassword(SignUpVO createdUser) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		emailVO.setSendTo(createdUser.getEmailId());
+		emailVO.setSubject(EmailConstants.TEMP_PASS_SUBJECT);
+		emailVO.setTemplateName(EmailConstants.TEMP_PASS_SUCCESS_TEMPLATE);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(FIRST_NAME, createdUser.getFirstName());
+		variables.put("tempPass", createdUser.getCreatePassword());
+		emailVO.setVariables(variables);
+		email.sendEMail(emailVO);
+	}
+
+	@Override
+	public void sendUpcomingWorkshopNotification(WorkshopVO workshop, int days) throws GlobalException, EmailException {
+		EmailVO emailVO = new EmailVO();
+		List<String> userEmails = workshop.getRegisteredUsers().stream().map(RegisteredUserVO::getEmailId).toList();
+		emailVO.setSendMultipleBCCTo(userEmails);
+		emailVO.setSubject(EmailConstants.WORKSHOP_NOTIFICATION_SUB + workshop.getWorkshopName()+ " in "+String.valueOf(days));
+		emailVO.setTemplateName(EmailConstants.WORKSHOP_NOTIFICATION_TEMP);
+		HashMap<String, String> variables = new HashMap<>();
+		variables.put(WORKSHOP_NAME, workshop.getWorkshopName());
+		variables.put("days", String.valueOf(days));
+		variables.put("instructor", workshop.getCreatedUser());
+		variables.put("workshopDate", workshop.getWorkshopDate());
+		variables.put("venue", workshop.getVenue());
+		variables.put("startTime", String.valueOf(workshop.getStartTime().getHour()) + " : "+String.valueOf(workshop.getStartTime().getMinute()));
+		variables.put("meetingUrl", workshop.getMeetingURL());
+		emailVO.setVariables(variables);
+		email.sendEMailMultipleBCC(emailVO);
 	}
 
 }
