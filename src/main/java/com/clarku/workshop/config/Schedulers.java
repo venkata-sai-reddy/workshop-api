@@ -24,4 +24,18 @@ public class Schedulers {
         schedulerService.checkRequestsAndNotify();
     	log.info("Scheduler :: checkRequestAndNotify() :: Scheduler job to check new skill request is Ended");
     }
+
+    @Scheduled(cron = "#{@schedulerConfig.getFourAMCronTime()}")
+    public void notifyWorkshopsPrior() {
+    	log.info("Scheduler :: NotifyTwoDaysPrior() :: Scheduler job to notify upcoming workshops started");
+        schedulerService.notifyWorkshopsPrior();
+    	log.info("Scheduler :: NotifyTwoDaysPrior() :: Scheduler job to notify upcoming workshops Ended");
+    }
+    
+    @Scheduled(cron = "#{@schedulerConfig.getFourAMCronTime()}")
+    public void notifyOneDayPrior() {
+    	log.info("Scheduler :: NotifyOneDayPrior() :: Scheduler job to notify upcoming workshops started");
+        schedulerService.notifyOneDayPrior();
+    	log.info("Scheduler :: NotifyOneDayPrior() :: Scheduler job to notify upcoming workshops Ended");
+    }
 }

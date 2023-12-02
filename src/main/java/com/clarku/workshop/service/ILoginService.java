@@ -14,4 +14,6 @@ public interface ILoginService {
 
 	Boolean signUpUser(SignUpVO userDetails) throws GlobalException;
 
+	Boolean createUser(SignUpVO createdUser) throws GlobalException;
+
 }

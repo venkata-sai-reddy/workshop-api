@@ -20,6 +20,8 @@ public class WorkshopVO {
 
 	private String venue;
 
+	private String meetingURL;
+
 	private Integer capacity;
 
 	private Integer enrollCount;
@@ -40,6 +42,8 @@ public class WorkshopVO {
 	private LocalDateTime endTime;
 
 	private List<SkillVO> selectedSkills;
+
+	private List<RegisteredUserVO> registeredUsers;
 
 	private Boolean isUserEnrolled;
 

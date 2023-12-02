@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <link rel="stylesheet" type="text/css" media="all" href="/gtvg/css/gtvg.css" />
+  </head>
+
+  <body>
+  
+    Hello, <br>
+    
+	<br>Welcome to Clark Workshop.<br><br>
+	<br>You have an upcoming workshop in <span th:text="${days}"> 1 </span> day. Please find the workshop details below<br>
+	<br>
+	<table>
+		<tr>
+			<td>
+				Workshop Name
+			</td>
+			<td> : </td>
+			<td>
+				<span th:text="${workshopName}"></span>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Workshop Date
+			</td>
+			<td> : </td>
+			<td>
+				<span th:text="${workshopDate}"></span>
+			</td>
+		</tr>
+				<tr>
+			<td>
+				Workshop Time
+			</td>
+			<td> : </td>
+			<td>
+				<span th:text="${startTime}"></span>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Instructor
+			</td>
+			<td> : </td>
+			<td>
+				<span th:text="${instructor}"></span>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Location
+			</td>
+			<td> : </td>
+			<td>
+				<span th:text="${venue}"></span>
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				Meeting Details
+			</td>
+			<td> : </td>
+			<td>
+				<span th:text="${meetingUrl}"></span>
+			</td>
+		</tr>
+	</table>
+	<br>
+	<br>
+	<br>Please do not reply to this email. This is system generated email.<br><br>
+    
+    Thanks,<br>
+	Workshop Team
+  </body>
+
+</html>

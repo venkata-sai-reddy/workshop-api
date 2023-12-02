@@ -57,4 +57,12 @@ public interface IWorkshopRepo {
 
 	void updateRequestSkillsStatus(List<Integer> skillsNotified, String status) throws GlobalException;
 
+	Boolean isUserCreatedWorkshop(Integer userId, Integer workshopId) throws GlobalException;
+
+	Boolean saveOrUpdateWorkshopMettingDetails(Integer workshopId, String meetingURL) throws GlobalException;
+
+	String getWorkshopMeetingDetails(Integer workshopId) throws GlobalException;
+
+	List<WorkshopVO> getNextTwoDaysWorkshops() throws GlobalException;
+
 }

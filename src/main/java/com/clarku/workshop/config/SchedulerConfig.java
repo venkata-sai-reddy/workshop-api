@@ -11,6 +11,13 @@ public class SchedulerConfig {
 	@Value("${scheduler.notificationCronExp}")
     private String scheduledTime;
 
+	@Value("${scheduler.fourAMCronTimeExp}")
+    private String fourAMCronTime;
+
+    public String getFourAMCronTime() {
+        return fourAMCronTime;
+    }
+
     public String getScheduledTime() {
         return scheduledTime;
     }

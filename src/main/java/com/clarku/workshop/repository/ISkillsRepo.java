@@ -14,4 +14,6 @@ public interface ISkillsRepo {
 
 	List<RequestVO> getUserRequestedSkills(Integer userId) throws GlobalException;
 
+	Boolean updateSkillStatus(SkillVO skill) throws GlobalException;
+
 }

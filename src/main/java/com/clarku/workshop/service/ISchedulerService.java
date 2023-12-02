@@ -4,4 +4,8 @@ public interface ISchedulerService {
 
 	void checkRequestsAndNotify();
 
+	void notifyWorkshopsPrior();
+
+	void notifyOneDayPrior();
+
 }

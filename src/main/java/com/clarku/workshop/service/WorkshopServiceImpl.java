@@ -59,7 +59,14 @@ public class WorkshopServiceImpl implements IWorkshopService {
 		WorkshopVO savedWorkshop = workshopRepo.getLastCrtdWrkshpByUserId(userId);
 		workshopDetails.setWorkshopId(savedWorkshop.getWorkshopId());
 		validateAndSaveSkills(workshopDetails);
+		checkAndUpdateURL(workshopDetails);
 		return workshopDetails;
+	}
+
+	private void checkAndUpdateURL(WorkshopVO workshopDetails) throws GlobalException {
+		if (workshopDetails.getVenue().equalsIgnoreCase(Constants.ONLINE)) {
+			workshopRepo.saveOrUpdateWorkshopMettingDetails(workshopDetails.getWorkshopId(), workshopDetails.getMeetingURL());
+		}
 	}
 
 	private void validateAndSaveSkills(WorkshopVO workshopDetails) throws GlobalException {
@@ -178,12 +185,17 @@ public class WorkshopServiceImpl implements IWorkshopService {
 			updatedFields.put("endTime", workshopDetails.getEndTime());
 			isVenueDateChange = true;
 		}
+		if (workshopDetails.getMeetingURL() != null && !workshop.getMeetingURL().equals(workshopDetails.getMeetingURL())) {
+			updatedFields.put("meetingURL", workshopDetails.getMeetingURL());
+			isVenueDateChange = true;
+		}
+		checkAndUpdateURL(workshopDetails);
 		if (workshopDetails.getSelectedSkills() != null && !workshop.getSelectedSkills().equals(workshopDetails.getSelectedSkills())) {
 			updateWorkshopSkills(workshopDetails, workshop.getSelectedSkills());
 		} else if(updatedFields.size() == 0) {
 			throw new GlobalException("Nothing to Update", HttpStatus.BAD_REQUEST);
 		}
-		if(isVenueDateChange) {
+		if(Boolean.TRUE.equals(isVenueDateChange)) {
 			validateOverlapping(workshopDetails);
 		}
 		return workshopRepo.updateWorkshop(updatedFields, workshop.getWorkshopId());
@@ -260,6 +272,7 @@ public class WorkshopServiceImpl implements IWorkshopService {
 	@Override
 	public WorkshopsTimeLineVO getAllWorkshops(Integer userId) throws GlobalException {
 		List<WorkshopVO> allWorkshops = workshopRepo.getAllWorkshops(userId);
+//		List<Integer> workshopIds = allWorkshops.stream().filter(workshop -> Constants.ONLINE.equalsIgnoreCase(workshop.getVenue())).map(WorkshopVO::getWorkshopId).toList();
 		return getWorkshopTimeLineMapper(allWorkshops);
 	}
 
@@ -314,7 +327,14 @@ public class WorkshopServiceImpl implements IWorkshopService {
 			log.error("Workshop Not exists");
 			throw new GlobalException("Workshop Not Exists", HttpStatus.BAD_REQUEST);
 		}
+		if (Constants.ONLINE.equalsIgnoreCase(workshop.getVenue())) {
+			String workshopMeetingURL = workshopRepo.getWorkshopMeetingDetails(workshop.getWorkshopId());
+			workshop.setMeetingURL(workshopMeetingURL);
+		}
 		workshop.setSelectedSkills(workshopRepo.getWorkshopSkills(workshopId));
+		if (workshop.getCreatedUserId().equals(userId)) {
+			workshop.setRegisteredUsers(workshopRepo.retrieveWorkshopRegisteredUser(workshopId));
+		}
 		return workshop;
 	}
 
@@ -468,6 +488,12 @@ public class WorkshopServiceImpl implements IWorkshopService {
 			allRequests = new ArrayList<>();
 		}
 		return allRequests;
+	}
+
+	@Override
+	public Boolean IsUserCreatedWorkshop(Integer userId, Integer workshopId) throws GlobalException {
+		
+		return workshopRepo.isUserCreatedWorkshop(userId, workshopId);
 	}
 
 }
