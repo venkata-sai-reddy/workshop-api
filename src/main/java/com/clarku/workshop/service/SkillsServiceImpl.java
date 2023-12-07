@@ -35,8 +35,18 @@ public class SkillsServiceImpl implements ISkillsService {
 
 	@Override
 	public Boolean updateRequestedSkills(SkillVO skill) throws GlobalException {
-		
 		return skillRepo.updateSkillStatus(skill);
+	}
+
+	@Override
+	public List<SkillVO> getAllSystemSkills() throws GlobalException {
+		return skillRepo.getAllSkills();
+	}
+
+	@Override
+	public Boolean addNewSkills(List<SkillVO> skillDetails) throws GlobalException {
+		
+		return skillRepo.saveNewSkillsByAdmin(skillDetails);
 	}
 
 }

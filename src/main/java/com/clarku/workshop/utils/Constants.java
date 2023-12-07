@@ -15,6 +15,12 @@ public class Constants {
 
 	public static final String REQUESTED = "Requested";
 
+	public static final String APPROVED = "Approved";
+
+	public static final String NOTIFIED = "Notified";
+
+	public static final String REJECTED = "Rejected";
+
 	public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
 
 	public static final String LOGIN_WRONG_PASS_EXP = "Username or password wrong, please try again";
@@ -33,14 +39,12 @@ public class Constants {
 
 	public static final String USER_EXISTS_SIGNUP_EXP = "User Already Exists, Please Sign In";
 
+	public static final String USER_EMAIL_EXISTS_EXP = "Email Already Exists, please use different Email Id";
+
 	public static final String CREATE_CONFIRM_PASS_MISSMATCH_EXP = "Create and Confirm password should be same";
 
 	public static final Integer WORKSHOP_DEFAULT_CAPACITY = 30;
 
 	public static final String ONLINE = "Online";
-
-	public static final String NOTIFIED = "Notified";
-
-	public static final String REJECTED = "Rejected";
 
 }

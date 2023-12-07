@@ -20,6 +20,8 @@ public class UserProfileVO {
 	private String userType;
 
 	private List<SkillVO> skills;
+
+	private List<SkillVO> newSkills;
 	
 	private Boolean isActive;
 	

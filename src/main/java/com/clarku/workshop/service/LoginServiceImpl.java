@@ -44,7 +44,12 @@ public class LoginServiceImpl implements ILoginService {
 	@Override
 	public UserVO signIn(LoginVO loginDetails) throws GlobalException, LoginException {
 		LoginVO userLoginDetails = validateUser(loginDetails);
-		return userRepo.retrieveUserDetails(userLoginDetails.getUserId());
+		UserVO userDetails = userRepo.retrieveUserDetails(userLoginDetails.getUserId());
+		userDetails.setIsTempPass(Boolean.FALSE);
+		if (StringUtils.isNotBlank(userLoginDetails.getTempPassword())) {
+			userDetails.setIsTempPass(Boolean.TRUE);
+		}
+		return userDetails;
 	}
 
 	private LoginVO validateUser(LoginVO loginDetails) throws GlobalException, LoginException {
@@ -130,7 +135,7 @@ public class LoginServiceImpl implements ILoginService {
 	@Override
 	public Boolean createUser(SignUpVO userDetails) throws GlobalException {
 		if (Boolean.TRUE.equals(loginRepo.isUserExists(userDetails.getEmailId()))) {
-			throw new GlobalException(Constants.USER_EXISTS_SIGNUP_EXP, HttpStatus.BAD_REQUEST);
+			throw new GlobalException(Constants.USER_EMAIL_EXISTS_EXP, HttpStatus.BAD_REQUEST);
 		}
 		userDetails.setCreatePassword("****");
 		userDetails.setConfirmPassword("****");

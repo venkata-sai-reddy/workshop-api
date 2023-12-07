@@ -321,8 +321,8 @@ public class WorkshopServiceImpl implements IWorkshopService {
 	}
 
 	@Override
-	public WorkshopVO getWorkshop(Integer workshopId, Integer userId) throws GlobalException {
-		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopId, userId);
+	public WorkshopVO getWorkshop(Integer workshopId, UserVO user) throws GlobalException {
+		WorkshopVO workshop = workshopRepo.retrieveWorkshop(workshopId, user.getUserId());
 		if (workshop == null) {
 			log.error("Workshop Not exists");
 			throw new GlobalException("Workshop Not Exists", HttpStatus.BAD_REQUEST);
@@ -332,7 +332,7 @@ public class WorkshopServiceImpl implements IWorkshopService {
 			workshop.setMeetingURL(workshopMeetingURL);
 		}
 		workshop.setSelectedSkills(workshopRepo.getWorkshopSkills(workshopId));
-		if (workshop.getCreatedUserId().equals(userId)) {
+		if (workshop.getCreatedUserId().equals(user.getUserId()) || Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
 			workshop.setRegisteredUsers(workshopRepo.retrieveWorkshopRegisteredUser(workshopId));
 		}
 		return workshop;

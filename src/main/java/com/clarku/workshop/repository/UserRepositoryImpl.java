@@ -314,4 +314,82 @@ public class UserRepositoryImpl implements IUserRepo{
 		return allUsers;
 	}
 
+	@Override
+	public UserProfileVO getUserDetails(Integer userId) throws GlobalException {
+		UserProfileVO userDetails = null;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(USER_ID, userId);
+		try {
+			userDetails = namedParameterJdbcTemplate.queryForObject(SqlProperties.admin.get("getUserDetails"), parameters, new BeanPropertyRowMapper<>(UserProfileVO.class));
+		} catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: getUserDetails(): data access exception {}", exp.getMessage());
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: getUserDetails(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return userDetails;
+	}
+
+	@Override
+	public Boolean deleteUser(Integer userId) throws GlobalException {
+		int deleteCount = 0;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		parameters.addValue(USER_ID, userId);
+		try {
+			deleteCount = namedParameterJdbcTemplate.update(SqlProperties.user.get("deleteUserByAdmin"), parameters);
+			log.debug("UserRepositoryImpl :: deleteUser(): {} Skills Updated to user {}", deleteCount, userId);
+	    } catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: deleteUser(): data access exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: deleteUser(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return deleteCount != 0;
+	}
+
+	@Override
+	public Boolean updateLoginDetails(Integer userId, HashMap<String, String> updatedFields)
+			throws GlobalException {
+		int updateCount = 0;
+		Boolean isFirstDone = false;
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		StringBuilder updateUserQuery = new StringBuilder(SqlProperties.user.get("updateLoginDynamicFields"));
+		parameters.addValue(USER_ID, userId);
+		if(updatedFields.containsKey("emailId")) {
+			parameters.addValue("emailId", updatedFields.get("emailId"));
+			updateUserQuery.append(" email_id = :emailId ");
+			isFirstDone = true;
+		}
+		if (updatedFields.containsKey("isActive")) {
+			parameters.addValue("isActive", Boolean.valueOf(updatedFields.get("isActive")));
+			if (Boolean.TRUE.equals(isFirstDone)) { 
+				updateUserQuery.append(",");
+			}
+			updateUserQuery.append(" active = :isActive ");
+			isFirstDone = true;
+		}
+		if(updatedFields.containsKey("isLocked")) {
+			parameters.addValue("isLocked", Boolean.valueOf(updatedFields.get("isLocked")));
+			if (Boolean.TRUE.equals(isFirstDone)) { 
+				updateUserQuery.append(",");
+			}
+			updateUserQuery.append(" locked = :isLocked ");
+			updateUserQuery.append(", un_suc_atmpt = 0 ");
+			isFirstDone = true;
+		}
+		updateUserQuery.append(" WHERE user_id = :userId;");
+		try {
+			if (Boolean.TRUE.equals(isFirstDone)) {
+				updateCount = namedParameterJdbcTemplate.update(updateUserQuery.toString(), parameters);
+			}
+		} catch (DataAccessException exp) {
+			log.error("UserRepositoryImpl :: updateLoginDetails(): data access exception {} {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("UserRepositoryImpl :: updateLoginDetails(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return updateCount != 0;
+	}
+
 }

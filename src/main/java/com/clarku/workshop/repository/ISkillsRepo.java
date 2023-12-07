@@ -16,4 +16,6 @@ public interface ISkillsRepo {
 
 	Boolean updateSkillStatus(SkillVO skill) throws GlobalException;
 
+	Boolean saveNewSkillsByAdmin(List<SkillVO> skills) throws GlobalException;
+
 }

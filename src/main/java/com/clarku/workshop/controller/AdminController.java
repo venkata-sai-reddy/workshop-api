@@ -8,11 +8,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.clarku.workshop.exception.EmailException;
@@ -70,27 +73,77 @@ public class AdminController {
 	public ResponseEntity<List<UserProfileVO>> getAllUsers(@RequestHeader HttpHeaders headers) throws GlobalException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (!user.getUserType().equals(Constants.ADMIN)) {
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
 			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
 		}
 		return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
+	}
+	
+	@GetMapping("/user")
+	public ResponseEntity<UserProfileVO> getUserProf(@RequestHeader HttpHeaders headers, @RequestParam Integer userId) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
+			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(userService.getUsersDetails(userId), HttpStatus.OK);
+	}
+
+	@PutMapping("/user/update")
+	public ResponseEntity<Boolean> updateUser(@RequestHeader HttpHeaders headers, @RequestBody UserProfileVO userDetails) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
+			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(userService.updateUser(userDetails), HttpStatus.OK);
+	}
+
+	@DeleteMapping("/user/delete")
+	public ResponseEntity<Boolean> deleteUser(@RequestHeader HttpHeaders headers, @RequestParam Integer userId) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
+			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(userService.deleteUser(userId), HttpStatus.OK);
 	}
 
 	@GetMapping("/skills/requested")
 	public ResponseEntity<List<SkillVO>> getRequestedSkills(@RequestHeader HttpHeaders headers) throws GlobalException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (!user.getUserType().equals(Constants.ADMIN)) {
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
 			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
 		}
 		return new ResponseEntity<>(skillService.getAllRequestedSkills(), HttpStatus.OK);
 	}
 
-	@PostMapping("/skills/update")
+	@GetMapping("/skills/all")
+	public ResponseEntity<List<SkillVO>> getAllSkills(@RequestHeader HttpHeaders headers) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
+			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(skillService.getAllSystemSkills(), HttpStatus.OK);
+	}
+
+	@PostMapping("/skills/add")
+	public ResponseEntity<Boolean> addNewSkills(@RequestHeader HttpHeaders headers, @RequestBody List<SkillVO> skillDetails) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
+			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(skillService.addNewSkills(skillDetails), HttpStatus.OK);
+	}
+
+	@PutMapping("/skills/update")
 	public ResponseEntity<Boolean> updateRequestedSkills(@RequestHeader HttpHeaders headers, @RequestBody SkillVO skill) throws GlobalException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (!user.getUserType().equals(Constants.ADMIN)) {
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
 			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
 		}
 		return new ResponseEntity<>(skillService.updateRequestedSkills(skill), HttpStatus.OK);
@@ -100,7 +153,7 @@ public class AdminController {
 	public ResponseEntity<Boolean> createUser(@RequestHeader HttpHeaders headers, @RequestBody SignUpVO createdUser) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (!user.getUserType().equals(Constants.ADMIN)) {
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
 			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
 		}
 		Boolean isUserCreated = loginService.createUser(createdUser);
@@ -122,7 +175,7 @@ public class AdminController {
 	public ResponseEntity<Boolean> generateTemporaryPassword(@RequestHeader HttpHeaders headers, @RequestBody UserProfileVO createdUser) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (!user.getUserType().equals(Constants.ADMIN)) {
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType())) {
 			throw new GlobalException("Don't have access to Peform Action", HttpStatus.UNAUTHORIZED);
 		}
 		String generatedCredentials = userService.generateTempPassword(createdUser.getUserId());
@@ -138,10 +191,10 @@ public class AdminController {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
 		WorkshopVO workshop;
-		if (user.getUserType().equals(Constants.STUDENT)) {
+		if (!(Constants.ADMIN.equalsIgnoreCase(user.getUserType()) || Constants.INSTRUCTOR.equalsIgnoreCase(user.getUserType())) ) {
 			throw new GlobalException("Don't have access to perform the action", HttpStatus.UNAUTHORIZED);
 		} else {
-			workshop = workshopService.getWorkshop(messageVO.getWorkshopId(), user.getUserId());
+			workshop = workshopService.getWorkshop(messageVO.getWorkshopId(), user);
 			if (!workshop.getCreatedUserId().equals(user.getUserId())) {
 				throw new GlobalException("Don't have access to perform the action", HttpStatus.UNAUTHORIZED);
 			}

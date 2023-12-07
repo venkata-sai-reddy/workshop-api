@@ -25,7 +25,7 @@ public interface IWorkshopService {
 
 	WorkshopsTimeLineVO getAllRegisteredWorkshops(Integer userId) throws GlobalException;
 
-	WorkshopVO getWorkshop(Integer workshopId, Integer userId) throws GlobalException;
+	WorkshopVO getWorkshop(Integer workshopId, UserVO user) throws GlobalException;
 
 	Boolean deleteWorkshop(Integer workshopId, UserVO user) throws GlobalException;
 

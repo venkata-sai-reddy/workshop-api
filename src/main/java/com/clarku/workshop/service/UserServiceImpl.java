@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.repository.ILoginRepo;
+import com.clarku.workshop.repository.ISkillsRepo;
 import com.clarku.workshop.repository.IUserRepo;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.utils.Secure;
@@ -34,6 +35,9 @@ public class UserServiceImpl implements IUserService {
 
 	@Autowired
 	private ILoginRepo loginRepo;
+
+	@Autowired
+	private ISkillsRepo skillRepo;
 
 	@Autowired
 	Secure secure;
@@ -136,6 +140,33 @@ public class UserServiceImpl implements IUserService {
 		userRepo.saveUserSkillsById(existingUser.getUserId(), addedSkills);
 		userRepo.deleteUserSkillsById(existingUser.getUserId(), deletedSkills);
 		if (updatedUser.getNewSkills() != null) {
+			skillRepo.saveNewSkills(updatedUser.getNewSkills());
+			userRepo.saveUserSkillsByName(existingUser.getUserId(), updatedUser.getNewSkills());
+		}
+		return !addedSkills.isEmpty() || !deletedSkills.isEmpty() || updatedUser.getNewSkills() != null;
+	}
+
+	private Boolean updateSkillsChange(UserProfileVO existingUser, UserProfileVO updatedUser) throws GlobalException {
+		List<SkillVO> userSkills = userRepo.retrieveUserSkills(existingUser.getUserId());
+		List<SkillVO> addedSkills = new ArrayList<>();
+		List<SkillVO> deletedSkills = new ArrayList<>();
+		Map<Integer, String> userSkillsMap = userSkills.stream().collect(Collectors.toMap(SkillVO::getSkillId, skill -> skill.getSkillName().toLowerCase()));
+		updatedUser.getSkills().stream().forEach(skill -> { 
+			if (!userSkillsMap.containsKey(skill.getSkillId())) {
+				addedSkills.add(skill);
+			}
+		});
+		Map<Integer, String> updatedUserSkillsMap = updatedUser.getSkills().stream().collect(Collectors.toMap(SkillVO::getSkillId, skill -> skill.getSkillName().toLowerCase()));
+		userSkills.stream().forEach(skill -> { 
+			if (!updatedUserSkillsMap.containsKey(skill.getSkillId())) {
+				deletedSkills.add(skill);
+			}
+		});
+		
+		userRepo.saveUserSkillsById(existingUser.getUserId(), addedSkills);
+		userRepo.deleteUserSkillsById(existingUser.getUserId(), deletedSkills);
+		if (updatedUser.getNewSkills() != null) {
+			skillRepo.saveNewSkillsByAdmin(updatedUser.getNewSkills());
 			userRepo.saveUserSkillsByName(existingUser.getUserId(), updatedUser.getNewSkills());
 		}
 		return !addedSkills.isEmpty() || !deletedSkills.isEmpty() || updatedUser.getNewSkills() != null;
@@ -151,6 +182,54 @@ public class UserServiceImpl implements IUserService {
 		String tempPass = secure.generateTempPass();
 		loginRepo.saveTempPassword(userId, secure.getEncrypted(tempPass));
 		return tempPass;
+	}
+
+	@Override
+	public UserProfileVO getUsersDetails(Integer userId) throws GlobalException {
+		UserProfileVO userDetails = userRepo.getUserDetails(userId);
+		if (userDetails == null) {
+			throw new GlobalException("User Not Found", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		userDetails.setSkills(userRepo.retrieveUserSkills(userId));
+		return userDetails;
+	}
+
+	@Override
+	public Boolean deleteUser(Integer userId) throws GlobalException {
+		return userRepo.deleteUser(userId);
+	}
+
+	@Override
+	public Boolean updateUser(UserProfileVO updatedUser) throws GlobalException {
+		UserProfileVO existingUser = userRepo.getUserDetails(updatedUser.getUserId());
+		HashMap<String, String> updatedDetails = new HashMap<>();
+		HashMap<String, String> loginUpdatedDetails = new HashMap<>();
+		if (!existingUser.getFirstName().equals(updatedUser.getFirstName())) {
+			updatedDetails.put("firstName", updatedUser.getFirstName());
+		}
+		if (!existingUser.getLastName().equals(updatedUser.getLastName())) {
+			updatedDetails.put("lastName", updatedUser.getLastName());
+		}
+		if (!existingUser.getPhoneNumber().equals(updatedUser.getPhoneNumber())) {
+			updatedDetails.put("phoneNumber", updatedUser.getPhoneNumber());
+		}
+		if (!existingUser.getIsActive().equals(updatedUser.getIsActive())) {
+			loginUpdatedDetails.put("isActive", String.valueOf(updatedUser.getIsActive()));
+		}
+		if (!existingUser.getIsLocked().equals(updatedUser.getIsLocked())) {
+			loginUpdatedDetails.put("isLocked", String.valueOf(updatedUser.getIsLocked()));
+			loginUpdatedDetails.put("attempts", "0");
+		}
+		Boolean isSkillsUpdated = updateSkillsChange(existingUser, updatedUser);
+		Boolean isUserProfUpdated = Boolean.FALSE;
+		Boolean isLoginUpdated = Boolean.FALSE;
+		if (!updatedDetails.isEmpty()) {
+			isUserProfUpdated = userRepo.updateUserProf(existingUser.getUserId(), updatedDetails);
+		}
+		if (!loginUpdatedDetails.isEmpty()) {
+			isLoginUpdated = userRepo.updateLoginDetails(existingUser.getUserId(), loginUpdatedDetails);
+		}
+		return isSkillsUpdated || isUserProfUpdated || isLoginUpdated;
 	}
 
 }

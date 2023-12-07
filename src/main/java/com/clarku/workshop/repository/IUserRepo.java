@@ -36,4 +36,10 @@ public interface IUserRepo {
 
 	List<UserProfileVO> getUsers() throws GlobalException;
 
+	UserProfileVO getUserDetails(Integer userId) throws GlobalException;
+
+	Boolean deleteUser(Integer userId) throws GlobalException;
+
+	Boolean updateLoginDetails(Integer userId, HashMap<String, String> loginUpdatedDetails) throws GlobalException;
+
 }

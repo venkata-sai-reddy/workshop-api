@@ -62,7 +62,7 @@ public class UserController {
 	public ResponseEntity<UserVO> getUserProfile(@RequestHeader HttpHeaders headers, @RequestParam Integer userId) throws GlobalException {
 		SessionVO sessionDetails = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(sessionDetails.getUserId());
-		if (!user.getUserType().equals(Constants.ADMIN) && user.getUserId() != userId ) {
+		if (!Constants.ADMIN.equalsIgnoreCase(user.getUserType()) && user.getUserId() != userId ) {
 			throw new GlobalException("Unauthorised to access", HttpStatus.UNAUTHORIZED);
 		}
 		UserVO searchedUser = userService.getUser(userId);
@@ -77,7 +77,7 @@ public class UserController {
 		if (Boolean.TRUE.equals(isChanged)) {
 			UserVO user = userService.getUser(sessionDetails.getUserId());
 			notify.sendPasswordChangeEmail(user.getEmailId(), user.getFirstName());
-		}		
+		}
 		return new ResponseEntity<>(isChanged, HttpStatus.OK);
 	}
 

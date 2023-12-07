@@ -39,7 +39,9 @@ public class EmailHelper {
 			helper.setSubject(emailVO.getSubject());
 			String htmlContent = templateEngine.process(emailVO.getTemplateName(), context);
 			helper.setText(htmlContent, true);
-			mailer.send(mimeMessage);
+			if (!isTestingMails(emailVO.getSendTo())) {
+				mailer.send(mimeMessage);
+			}
 		} catch (MessagingException exp) {
 			log.error("Failed to send the Notification with message : \n {} \n with root cause:\n {}", exp.getMessage(), exp.getCause());
 		} catch (Exception exp) {
@@ -47,6 +49,10 @@ public class EmailHelper {
 		}
 	}
 	
+	private boolean isTestingMails(String sendTo) {
+		return sendTo.endsWith("@testing.com");
+	}
+
 	public void sendEMailMultipleBCC(EmailVO emailVO) throws GlobalException, EmailException {
 		MimeMessage mimeMessage = mailer.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");

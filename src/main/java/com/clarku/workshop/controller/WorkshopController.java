@@ -60,7 +60,7 @@ public class WorkshopController {
 	public ResponseEntity<WorkshopVO> createWorkshop(@RequestHeader HttpHeaders headers, @Validated(WorkshopAddValidation.class) @RequestBody WorkshopVO workshopDetails) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (user.getUserType().equals(Constants.STUDENT)) {
+		if (!(Constants.ADMIN.equalsIgnoreCase(user.getUserType()) || Constants.INSTRUCTOR.equalsIgnoreCase(user.getUserType())) ) {
 			throw new GlobalException("Don't have access to Create Workshop", HttpStatus.UNAUTHORIZED);
 		}
 		workshopDetails = workshopService.createWorkshop(workshopDetails, session.getUserId());
@@ -71,7 +71,8 @@ public class WorkshopController {
 	@GetMapping("/view")
 	public ResponseEntity<WorkshopVO> viewWorkshop(@RequestHeader HttpHeaders headers, @RequestParam Integer workshopId) throws GlobalException {
 		SessionVO session = authService.retrieveSession(headers);
-		WorkshopVO workshopDetails = workshopService.getWorkshop(workshopId, session.getUserId());
+		UserVO user = userService.getUser(session.getUserId());
+		WorkshopVO workshopDetails = workshopService.getWorkshop(workshopId, user);
 		return new ResponseEntity<>(workshopDetails, HttpStatus.OK);
 	}
 
@@ -82,9 +83,8 @@ public class WorkshopController {
 		UserVO user = userService.getUser(session.getUserId());
 		if (Boolean.FALSE.equals(isEnrolled)) {
 			throw new GlobalException("Failed to Enroll", HttpStatus.BAD_REQUEST);
-		} else {
-			notify.sendEnrollSuccessEmail(workshop, user);
 		}
+		notify.sendEnrollSuccessEmail(workshop, user);
 		return new ResponseEntity<>(isEnrolled, HttpStatus.OK);
 	}
 	
@@ -94,10 +94,9 @@ public class WorkshopController {
 		Boolean isUnEnrolled = workshopService.unEnrollWorkshop(workshop.getWorkshopId(), session.getUserId());
 		UserVO user = userService.getUser(session.getUserId());
 		if (Boolean.FALSE.equals(isUnEnrolled)) {
-			throw new GlobalException("Failed to Enroll", HttpStatus.BAD_REQUEST);
-		} else {
-			notify.sendUnEnrollSuccessEmail(workshop, user);
+			throw new GlobalException("Failed to UnEnroll", HttpStatus.BAD_REQUEST);
 		}
+		notify.sendUnEnrollSuccessEmail(workshop, user);
 		return new ResponseEntity<>(isUnEnrolled, HttpStatus.OK);
 	}
 
@@ -116,17 +115,16 @@ public class WorkshopController {
 	public ResponseEntity<Boolean> deleteWorkshop(@RequestHeader HttpHeaders headers, @RequestBody WorkshopVO workshop) throws GlobalException, EmailException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (user.getUserType().equals(Constants.STUDENT)) {
+		if (!(Constants.ADMIN.equalsIgnoreCase(user.getUserType()) || Constants.INSTRUCTOR.equalsIgnoreCase(user.getUserType())) ) {
 			throw new GlobalException("Don't have access", HttpStatus.UNAUTHORIZED);
 		}
 		Boolean isDeleted = workshopService.deleteWorkshop(workshop.getWorkshopId(), user);
 		if (Boolean.FALSE.equals(isDeleted)) {
 			throw new GlobalException("Workshop Failed to Delete", HttpStatus.BAD_REQUEST);
-		} else {
-			notify.sendWorkshopDeletedSuccessEmail(workshop, user);
-			List<String> registeredUsers = workshopService.getRegisteredWorkshopUsersEmail(workshop.getWorkshopId());
-			notify.sendWorkshopCancelledEmail(workshop, registeredUsers);
 		}
+		notify.sendWorkshopDeletedSuccessEmail(workshop, user);
+		List<String> registeredUsers = workshopService.getRegisteredWorkshopUsersEmail(workshop.getWorkshopId());
+		notify.sendWorkshopCancelledEmail(workshop, registeredUsers);
 		return new ResponseEntity<>(isDeleted, HttpStatus.OK);
 	}
 
@@ -148,7 +146,7 @@ public class WorkshopController {
 	public ResponseEntity<WorkshopsTimeLineVO> getAllWorkshopsByUser(@RequestHeader HttpHeaders headers) throws GlobalException {
 		SessionVO session = authService.retrieveSession(headers);
 		UserVO user = userService.getUser(session.getUserId());
-		if (user.getUserType().equals(Constants.STUDENT)) {
+		if (!(Constants.ADMIN.equalsIgnoreCase(user.getUserType()) || Constants.INSTRUCTOR.equalsIgnoreCase(user.getUserType())) ) {
 			throw new GlobalException("Don't have access", HttpStatus.UNAUTHORIZED);
 		}
 		WorkshopsTimeLineVO workshops = workshopService.getAllCreatedWorkshops(session.getUserId());
@@ -174,7 +172,7 @@ public class WorkshopController {
 		SessionVO session = authService.retrieveSession(headers);
 		Integer userId = session.getUserId();
 		UserVO user = userService.getUser(userId);
-		if (user.getUserType().equals(Constants.STUDENT)) {
+		if (!(Constants.ADMIN.equalsIgnoreCase(user.getUserType()) || Constants.INSTRUCTOR.equalsIgnoreCase(user.getUserType())) ) {
 			throw new GlobalException("Don't have access to Update Workshop", HttpStatus.UNAUTHORIZED);
 		}
 		Boolean isUpdated = workshopService.updateWorkshop(workshopDetails, userId);

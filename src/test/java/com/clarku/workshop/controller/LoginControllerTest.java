@@ -2,6 +2,8 @@ package com.clarku.workshop.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,12 +15,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.clarku.workshop.exception.EmailException;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.exception.LoginException;
+import com.clarku.workshop.service.INotificationService;
+import com.clarku.workshop.service.IUserService;
 import com.clarku.workshop.service.LoginServiceImpl;
 import com.clarku.workshop.service.SessionServiceImpl;
 import com.clarku.workshop.vo.LoginVO;
 import com.clarku.workshop.vo.SessionVO;
+import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.UserVO;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -29,6 +35,12 @@ public class LoginControllerTest {
 
 	@Mock
 	LoginServiceImpl loginService;
+
+	@Mock
+	IUserService userService;
+
+	@Mock
+	INotificationService notifyservice;
 
 	@Mock
 	SessionServiceImpl sessionService;
@@ -60,8 +72,9 @@ public class LoginControllerTest {
 		Mockito.when(loginService.signIn(Mockito.any())).thenReturn(userDetails);
 		Mockito.doNothing().when(loginService).updateLastLogin(Mockito.anyInt());
 		Mockito.when(sessionService.createSession(Mockito.anyInt())).thenReturn(sessionVO);
+		Mockito.when(userService.getUserSkills(Mockito.anyInt())).thenReturn(new ArrayList<>());
 		ResponseEntity<UserVO> actual = loginController.signIn(loginDetails);
-
+		
 		assertEquals(HttpStatus.OK, actual.getStatusCode());
 		assertEquals(1, actual.getBody().getSession().getSessionId());
 	}
@@ -71,5 +84,27 @@ public class LoginControllerTest {
 		Mockito.when(loginService.signIn(Mockito.any())).thenThrow(new LoginException("", HttpStatus.UNAUTHORIZED));
 		loginController.signIn(loginDetails);
 	}
+	
+	@Test
+	public void signUpTest_Success() throws GlobalException, LoginException, EmailException {
+		Mockito.when(loginService.signUpUser(Mockito.any())).thenReturn(true);
+		SignUpVO userDetails = new SignUpVO();
+		ResponseEntity<Boolean> actual = loginController.signUp(userDetails);
+		assertEquals(HttpStatus.OK, actual.getStatusCode());
+	}
+	
+	@Test
+	public void signUpTest_Fail() throws GlobalException, LoginException, EmailException {
+		Mockito.when(loginService.signUpUser(Mockito.any())).thenReturn(false);
+		SignUpVO userDetails = new SignUpVO();
+		ResponseEntity<Boolean> actual = loginController.signUp(userDetails);
+		assertEquals(HttpStatus.OK, actual.getStatusCode());
+	}
 
+	@Test
+	public void logoutTest_Success() throws GlobalException, LoginException, EmailException {
+		Mockito.doNothing().when(sessionService).endSession(Mockito.anyInt());
+		ResponseEntity<Boolean> actual = loginController.logout(1);
+		assertEquals(HttpStatus.OK, actual.getStatusCode());
+	}
 }

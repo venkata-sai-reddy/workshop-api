@@ -25,4 +25,10 @@ public interface IUserService {
 
 	String generateTempPassword(Integer userId) throws GlobalException;
 
+	UserProfileVO getUsersDetails(Integer userId) throws GlobalException;
+
+	Boolean deleteUser(Integer userId) throws GlobalException;
+
+	Boolean updateUser(UserProfileVO userDetails) throws GlobalException;
+
 }

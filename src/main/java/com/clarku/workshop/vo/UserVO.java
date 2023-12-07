@@ -22,6 +22,8 @@ public class UserVO {
 
 	private String userType;
 
+	private Boolean isTempPass;
+
 	private List<SkillVO> skills;
 
 	private List<SkillVO> newSkills;

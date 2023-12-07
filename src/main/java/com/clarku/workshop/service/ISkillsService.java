@@ -9,8 +9,12 @@ public interface ISkillsService {
 
 	List<SkillVO> getAllSkills() throws GlobalException;
 
+	List<SkillVO> getAllSystemSkills() throws GlobalException;
+
 	List<SkillVO> getAllRequestedSkills() throws GlobalException;
 
 	Boolean updateRequestedSkills(SkillVO skill) throws GlobalException;
+
+	Boolean addNewSkills(List<SkillVO> skillDetails) throws GlobalException;
 
 }
