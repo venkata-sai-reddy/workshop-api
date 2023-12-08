@@ -29,6 +29,7 @@ import com.clarku.workshop.service.IUserService;
 import com.clarku.workshop.service.IWorkshopService;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.vo.CustomMessageVO;
+import com.clarku.workshop.vo.RequestVO;
 import com.clarku.workshop.vo.SessionVO;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
@@ -224,6 +225,43 @@ public class AdminControllerTest {
 
 	@Test(expected = GlobalException.class)
 	public void testRequestedskills_Exception() throws GlobalException, EmailException {
+		Mockito.when(authService.retrieveSession(Mockito.any())).thenThrow(new GlobalException("Invalid Session", HttpStatus.UNAUTHORIZED));
+		HttpHeaders headers = new HttpHeaders();
+		adminController.getRequestedSkills(headers);
+	}
+
+	@Test
+	public void testRequestedWorkshops_AdminSuccess() throws GlobalException, EmailException {
+		Mockito.when(authService.retrieveSession(Mockito.any())).thenReturn(sessionVO);
+		Mockito.when(userService.getUser(Mockito.anyInt())).thenReturn(userVO);
+		userVO.setUserType(Constants.ADMIN);
+		Mockito.when(skillService.getAllRequestedSkillWorkshops()).thenReturn(new ArrayList<>());
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<List<RequestVO>> actual = adminController.getAllRequestedWorkshops(headers);
+		assertEquals(HttpStatus.OK, actual.getStatusCode());
+	}
+
+	@Test
+	public void testRequestedWorkshops_Success() throws GlobalException, EmailException {
+		Mockito.when(authService.retrieveSession(Mockito.any())).thenReturn(sessionVO);
+		Mockito.when(userService.getUser(Mockito.anyInt())).thenReturn(userVO);
+		userVO.setUserType(Constants.INSTRUCTOR);
+		Mockito.when(skillService.getAllRequestedSkillWorkshops()).thenReturn(new ArrayList<>());
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<List<RequestVO>> actual = adminController.getAllRequestedWorkshops(headers);
+		assertEquals(HttpStatus.OK, actual.getStatusCode());
+	}
+
+	@Test(expected = GlobalException.class)
+	public void testRequestedWorkshops_UnAuthException() throws GlobalException, EmailException {
+		Mockito.when(authService.retrieveSession(Mockito.any())).thenReturn(sessionVO);
+		Mockito.when(userService.getUser(Mockito.anyInt())).thenReturn(userVO);
+		HttpHeaders headers = new HttpHeaders();
+		adminController.getRequestedSkills(headers);
+	}
+
+	@Test(expected = GlobalException.class)
+	public void testRequestedWorkshops_Exception() throws GlobalException, EmailException {
 		Mockito.when(authService.retrieveSession(Mockito.any())).thenThrow(new GlobalException("Invalid Session", HttpStatus.UNAUTHORIZED));
 		HttpHeaders headers = new HttpHeaders();
 		adminController.getRequestedSkills(headers);

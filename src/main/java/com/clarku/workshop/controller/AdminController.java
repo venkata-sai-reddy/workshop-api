@@ -30,6 +30,7 @@ import com.clarku.workshop.service.IWorkshopService;
 import com.clarku.workshop.utils.Constants;
 import com.clarku.workshop.vo.CustomMessageVO;
 import com.clarku.workshop.vo.RegisteredUserVO;
+import com.clarku.workshop.vo.RequestVO;
 import com.clarku.workshop.vo.SessionVO;
 import com.clarku.workshop.vo.SignUpVO;
 import com.clarku.workshop.vo.SkillVO;
@@ -117,6 +118,16 @@ public class AdminController {
 			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
 		}
 		return new ResponseEntity<>(skillService.getAllRequestedSkills(), HttpStatus.OK);
+	}
+
+	@GetMapping("/request/workshops")
+	public ResponseEntity<List<RequestVO>> getAllRequestedWorkshops(@RequestHeader HttpHeaders headers) throws GlobalException {
+		SessionVO session = authService.retrieveSession(headers);
+		UserVO user = userService.getUser(session.getUserId());
+		if (!(Constants.ADMIN.equalsIgnoreCase(user.getUserType()) || Constants.INSTRUCTOR.equalsIgnoreCase(user.getUserType())) ) {
+			throw new GlobalException("Don't have access to Page", HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(skillService.getAllRequestedSkillWorkshops(), HttpStatus.OK);
 	}
 
 	@GetMapping("/skills/all")

@@ -17,7 +17,6 @@ public class AdminServiceImpl implements IAdminService{
 
 	@Override
 	public List<VenueVO> getVenues() throws GlobalException {
-		
 		return adminRepo.retrieveVenues();
 	}
 

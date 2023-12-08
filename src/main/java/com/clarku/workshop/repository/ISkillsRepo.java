@@ -18,4 +18,6 @@ public interface ISkillsRepo {
 
 	Boolean saveNewSkillsByAdmin(List<SkillVO> skills) throws GlobalException;
 
+	List<RequestVO> getAllRequestedSkills() throws GlobalException;
+
 }

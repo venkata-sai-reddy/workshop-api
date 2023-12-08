@@ -111,6 +111,21 @@ public class SkillsRepositoryImpl implements ISkillsRepo{
 	}
 
 	@Override
+	public List<RequestVO> getAllRequestedSkills() throws GlobalException {
+		List<RequestVO> allSkills = new ArrayList<>();
+		MapSqlParameterSource parameters = new MapSqlParameterSource();
+		try {
+			allSkills = namedParameterJdbcTemplate.query(SqlProperties.skills.get("getAllRequestedSkills"), parameters, new BeanPropertyRowMapper<>(RequestVO.class));
+		} catch (DataAccessException exp) {
+			log.error("SkillsRepositoryImpl :: getUserRequestedSkills(): data access exception {} {}", exp.getMessage(), exp.getCause());
+		} catch (Exception exp) {
+			log.error("SkillsRepositoryImpl :: getUserRequestedSkills(): exception {}", exp.getMessage());
+			throw new GlobalException(Constants.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return allSkills;
+	}
+
+	@Override
 	public Boolean updateSkillStatus(SkillVO skill) throws GlobalException {
 		int updateCount = 0;
 		MapSqlParameterSource parameters = new MapSqlParameterSource();

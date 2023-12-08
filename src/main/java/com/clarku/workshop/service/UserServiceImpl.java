@@ -136,7 +136,7 @@ public class UserServiceImpl implements IUserService {
 				deletedSkills.add(skill);
 			}
 		});
-		
+
 		userRepo.saveUserSkillsById(existingUser.getUserId(), addedSkills);
 		userRepo.deleteUserSkillsById(existingUser.getUserId(), deletedSkills);
 		if (updatedUser.getNewSkills() != null) {

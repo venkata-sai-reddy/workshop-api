@@ -16,5 +16,6 @@ public class RequestVO {
 	private Integer requestedUserId;
 
 	private LocalDateTime requestedDate;
-	
+
+	private String status;
 }

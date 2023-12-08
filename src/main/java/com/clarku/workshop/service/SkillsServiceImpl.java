@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.clarku.workshop.exception.GlobalException;
 import com.clarku.workshop.repository.ISkillsRepo;
 import com.clarku.workshop.utils.Constants;
+import com.clarku.workshop.vo.RequestVO;
 import com.clarku.workshop.vo.SkillVO;
 
 import lombok.extern.log4j.Log4j2;
@@ -45,8 +46,12 @@ public class SkillsServiceImpl implements ISkillsService {
 
 	@Override
 	public Boolean addNewSkills(List<SkillVO> skillDetails) throws GlobalException {
-		
 		return skillRepo.saveNewSkillsByAdmin(skillDetails);
+	}
+
+	@Override
+	public List<RequestVO> getAllRequestedSkillWorkshops() throws GlobalException {
+		return skillRepo.getAllRequestedSkills();
 	}
 
 }
