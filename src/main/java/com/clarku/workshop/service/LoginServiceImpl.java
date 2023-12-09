@@ -140,6 +140,7 @@ public class LoginServiceImpl implements ILoginService {
 		userDetails.setCreatePassword("****");
 		userDetails.setConfirmPassword("****");
 		Boolean isUserSaved = userRepo.saveSignUpUser(userDetails);
+		userDetails.setUserId(loginRepo.getUserId(userDetails.getEmailId()));
 		return isUserSaved && loginRepo.saveLoginDetails(userDetails);
 	}
 
